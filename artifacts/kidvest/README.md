@@ -116,3 +116,5 @@ Stripe's USD minimum is $0.50. When the exact missing amount is lower, checkout 
 Test card: `4242 4242 4242 4242`, any future expiry, any three-digit CVC. Decline test card: `4000 0000 0000 0002`.
 
 Run `npm test` for settlement, duplicate notification, ownership, altered amount/currency/mode, spending-limit, rejected-request and expired-quote checks. A successful build or unit test is not proof of a hosted Checkout payment: the browser-funded flow additionally requires working MongoDB credentials.
+
+Development verification completed with Stripe test cards: hosted wallet top-up, return-page confirmation, duplicate confirmations, child request → exact-missing-amount Checkout → automatic approval → updated holdings/balance, cancellation without credit, child payment denial, invalid webhook signature rejection, and repeated valid signed paid-event delivery without duplicate funds or holdings. The nine automated settlement/authorization regression checks and the production build also pass. Live payments, multi-server deployment behavior and a full accessibility/security audit were not tested.
