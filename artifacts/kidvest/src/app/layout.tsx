@@ -4,16 +4,22 @@ import "../index.css";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "KidVest - Family investing adventures",
+  title: "العب و اكسب — مغامرة مالية للعائلة",
   description:
-    "Kids discover real companies and request virtual investments while parents guide every decision. Educational use only. Not financial advice.",
+    "العب و اكسب: تعلّم الادخار والاستثمار الافتراضي مع العائلة، بموافقة الوالدين على كل قرار. للاستخدام التعليمي فقط، وليست نصيحة مالية.",
+  openGraph: {
+    title: "العب و اكسب",
+    description: "مغامرة تعليمية للأطفال لتعلّم الادخار والاستثمار الافتراضي بإشراف الوالدين.",
+    locale: "ar",
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" dir="ltr" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
       <body className="min-h-[100dvh]">
         <Providers>{children}</Providers>
       </body>

@@ -1,4 +1,4 @@
-# KidVest
+# العب و اكسب
 
 A family stock-learning web application with separate parent and kid portals. All holdings and transactions are paper trading. No brokerage is connected.
 

@@ -1,6 +1,6 @@
 "use client";
 import type { ReactNode } from "react";
-import { ArrowDownRight, Coins, PiggyBank, Receipt, TrendingUp, Wallet } from "lucide-react";
+import { ArrowDownRight, Coins, Receipt, TrendingUp, Wallet } from "lucide-react";
 import type { Holding, Portfolio, Transaction } from "@workspace/api-client-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/components/i18n";
@@ -16,7 +16,7 @@ export function PortfolioView({ portfolio, onSell, emptyIcon, emptyAction }: { p
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label={tr("Holdings value", "قيمة الحيازات")} value={money(p.totalValue)} icon={<PiggyBank className="h-5 w-5" />} testId="text-portfolio-value" />
+        <StatTile label={tr("Holdings value", "قيمة الحيازات")} value={money(p.totalValue)} icon={<Coins className="h-5 w-5" />} testId="text-portfolio-value" />
         <StatTile label={tr("Total cost", "إجمالي التكلفة")} value={money(p.totalCost)} icon={<Coins className="h-5 w-5" />} tone="muted" />
         <StatTile label={tr("Gain / loss", "الربح / الخسارة")} value={<SignedMoney value={p.gainLoss} />} icon={<TrendingUp className="h-5 w-5" />} tone="accent" hint={tr("Virtual. Not guaranteed.", "افتراضي. غير مضمون.")} />
         <StatTile label={tr("Wallet", "المحفظة")} value={money(p.balance)} icon={<Wallet className="h-5 w-5" />} tone="secondary" testId="text-wallet-balance" />

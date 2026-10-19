@@ -54,8 +54,8 @@ export default function Landing() {
           </h1>
           <p className="mt-6 max-w-lg text-lg font-semibold text-muted-foreground">
             {tr(
-              "KidVest lets children ages 7-12 discover real companies and ask to make virtual investments. Every single decision goes through a parent first.",
-              "كيدفِست تتيح للأطفال من ٧ إلى ١٢ عامًا اكتشاف شركات حقيقية وطلب استثمارات افتراضية. وكل قرار يمرّ أولًا عبر أحد الوالدين.",
+              "العب و اكسب lets children ages 7-12 discover real companies and ask to make virtual investments. Every single decision goes through a parent first.",
+              "«العب و اكسب» تتيح للأطفال من ٧ إلى ١٢ عامًا اكتشاف شركات حقيقية وطلب استثمارات افتراضية. وكل قرار يمرّ أولًا عبر أحد الوالدين.",
             )}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -130,7 +130,7 @@ export default function Landing() {
         </div>
         <div className="grid gap-4 md:col-span-2 sm:grid-cols-2">
           {[
-            [tr("Not a brokerage", "ليست شركة وساطة"), tr("Holdings are virtual and live inside KidVest. Nobody buys a real share.", "الحيازات افتراضية داخل كيدفِست. لا يُشترى أي سهم حقيقي.")],
+            [tr("Not a brokerage", "ليست شركة وساطة"), tr("Holdings are virtual and live inside العب و اكسب. Nobody buys a real share.", "الحيازات افتراضية داخل «العب و اكسب». لا يُشترى أي سهم حقيقي.")],
             [tr("No guaranteed returns", "لا عوائد مضمونة"), tr("Prices go up and down. That is the lesson, not a bug.", "الأسعار ترتفع وتنخفض. هذا هو الدرس، وليس خطأ.")],
             [tr("Demo is clearly labeled", "العرض التجريبي موسوم بوضوح"), tr("Demo families use sample prices and virtual credits only.", "العائلات التجريبية تستخدم أسعارًا تجريبية ورصيدًا افتراضيًا فقط.")],
             [tr("Payments stay honest", "مدفوعات صادقة"), tr("Real wallet top-ups need a connected payment provider. We never fake a charge.", "شحن المحفظة الحقيقي يحتاج مزوّد دفع متصل. لا نزيّف أي عملية دفع.")],
@@ -167,7 +167,7 @@ function Entrance({
       <h3 className="font-display relative mt-6 text-3xl font-extrabold md:text-4xl">{title}</h3>
       <p className="relative mt-2 max-w-sm font-semibold opacity-90">{body}</p>
       <div className="relative mt-6 flex flex-wrap items-center gap-4">
-        <Link href={href} data-testid={testId} className="inline-flex h-12 items-center gap-2 rounded-2xl bg-card px-6 font-extrabold text-foreground shadow-[0_5px_0_hsl(var(--foreground)/0.25)] transition active:translate-y-1">
+        <Link href={href} data-testid={testId} className="inline-flex h-12 items-center gap-2 rounded-2xl bg-card px-6 font-extrabold text-foreground shadow-[0_4px_12px_hsl(var(--foreground)/0.12)] transition hover:shadow-[0_6px_18px_hsl(var(--foreground)/0.16)] active:translate-y-0.5">
           {title} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
         </Link>
         {extra}

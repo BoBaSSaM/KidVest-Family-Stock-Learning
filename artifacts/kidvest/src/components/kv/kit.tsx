@@ -186,8 +186,8 @@ export function Logo({ className }: { className?: string }) {
         </svg>
         <span className="absolute -end-1 -top-1 h-3.5 w-3.5 rounded-full border-2 border-card bg-accent" />
       </span>
-      <span className="font-display text-2xl font-extrabold tracking-tight">
-        Kid<span className="text-primary">Vest</span>
+      <span dir="rtl" className="font-display whitespace-nowrap text-2xl font-extrabold">
+        العب و <span className="text-primary">اكسب</span>
       </span>
     </span>
   );
@@ -232,8 +232,8 @@ export function Disclaimer({ className }: { className?: string }) {
   return (
     <p className={cn("text-xs font-bold text-muted-foreground", className)}>
       {tr(
-        "Educational use only. Not financial advice. KidVest is not a brokerage; investments are virtual and returns are never guaranteed.",
-        "للاستخدام التعليمي فقط. ليست نصيحة مالية. كيدفِست ليست شركة وساطة؛ الاستثمارات افتراضية والعوائد غير مضمونة أبدًا.",
+        "Educational use only. Not financial advice. العب و اكسب is not a brokerage; investments are virtual and returns are never guaranteed.",
+        "للاستخدام التعليمي فقط. ليست نصيحة مالية. «العب و اكسب» ليست شركة وساطة؛ الاستثمارات افتراضية والعوائد غير مضمونة أبدًا.",
       )}
     </p>
   );

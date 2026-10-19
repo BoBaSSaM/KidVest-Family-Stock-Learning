@@ -106,7 +106,7 @@ function LessonDialog({ lesson, onClose }: { lesson: Lesson | null; onClose: () 
           <div className="grid gap-2" role="radiogroup">
             {lesson.options.map((o, i) => (
               <button key={i} type="button" role="radio" aria-checked={answer === i} onClick={() => { setAnswer(i); setResult(null); }} data-testid={`button-option-${i}`}
-                className={cn("flex items-center gap-3 rounded-2xl border-2 p-3 text-start font-bold transition", answer === i ? "border-primary bg-primary/10 shadow-[0_4px_0_hsl(var(--primary-deep))]" : "border-border hover:-translate-y-0.5")}>
+                className={cn("flex items-center gap-3 rounded-2xl border-2 p-3 text-start font-bold transition", answer === i ? "border-primary bg-primary/10 shadow-[0_3px_12px_hsl(var(--primary)/0.14)]" : "border-border hover:-translate-y-0.5")}>
                 <span className={cn("grid h-8 w-8 shrink-0 place-items-center rounded-xl font-num text-sm", answer === i ? "bg-primary text-primary-foreground" : "bg-muted")}>{String.fromCharCode(65 + i)}</span>{o}
               </button>
             ))}

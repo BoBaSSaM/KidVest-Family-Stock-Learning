@@ -1,4 +1,8 @@
-# KidVest
+# العب و اكسب
+
+Public game name: **العب و اكسب**. Keep existing KidVest internal identifiers and integration metadata stable.
+
+Brand rules requested by the user: Arabic is the default language (RTL), with the English language switch retained. Do not use pig or piggy-bank icons, emoji, or pictures; use coins, wallets, or treasure chests instead. Keep button shadows soft and blurred rather than hard offset blocks.
 
 Family stock-learning web app with separate parent and kid portals. All investing is virtual paper trading; no brokerage connection. Show “Educational use only. Not financial advice.”
 

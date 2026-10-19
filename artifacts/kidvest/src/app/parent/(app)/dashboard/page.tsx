@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { ArrowRight, Clock3, Inbox, LineChart, PiggyBank, TrendingUp, UserPlus, Users, Wallet } from "lucide-react";
+import { ArrowRight, Clock3, Coins, Inbox, LineChart, TrendingUp, UserPlus, Users, Wallet } from "lucide-react";
 import { useGetDashboard } from "@workspace/api-client-react";
 import { useI18n } from "@/components/i18n";
 import {
@@ -39,7 +39,7 @@ export default function ParentDashboard() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label={tr("Family portfolios", "محافظ العائلة")} value={money(d.totalValue)} icon={<PiggyBank className="h-5 w-5" />} testId="text-total-value" />
+        <StatTile label={tr("Family portfolios", "محافظ العائلة")} value={money(d.totalValue)} icon={<Coins className="h-5 w-5" />} testId="text-total-value" />
         <StatTile label={tr("Wallet balances", "أرصدة المحافظ")} value={money(d.balance)} icon={<Wallet className="h-5 w-5" />} tone="secondary" testId="text-balance" />
         <StatTile label={tr("Gain / loss", "الربح / الخسارة")} value={<SignedMoney value={d.gainLoss} />} icon={<TrendingUp className="h-5 w-5" />} tone="accent" hint={tr("Virtual, never guaranteed", "افتراضي وغير مضمون")} />
         <StatTile label={tr("Waiting for you", "بانتظارك")} value={d.pendingCount} icon={<Clock3 className="h-5 w-5" />} tone="danger" testId="text-pending-count" />

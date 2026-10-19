@@ -397,10 +397,10 @@ body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-in
 
 @layer components {
   .toy-btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; font-weight: 800; white-space: nowrap; user-select: none;
-    --deep: hsl(var(--primary-deep)); box-shadow: 0 5px 0 var(--deep); transition: transform .12s ease, box-shadow .12s ease, opacity .2s; outline: none; }
-  .toy-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 0 var(--deep); }
-  .toy-btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 var(--deep); }
-  .toy-btn:focus-visible { box-shadow: 0 5px 0 var(--deep), 0 0 0 4px hsl(var(--ring) / .35); }
+    --deep: hsl(var(--primary-deep)); box-shadow: 0 3px 10px hsl(var(--foreground) / .12), 0 1px 2px hsl(var(--foreground) / .08); transition: transform .18s ease, box-shadow .18s ease, opacity .2s; outline: none; }
+  .toy-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 5px 16px hsl(var(--foreground) / .16), 0 2px 4px hsl(var(--foreground) / .06); }
+  .toy-btn:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 1px 5px hsl(var(--foreground) / .10); }
+  .toy-btn:focus-visible { outline: 3px solid hsl(var(--ring) / .55); outline-offset: 3px; }
   .toy-btn:disabled { opacity: .55; cursor: not-allowed; }
   .toy-primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
   .toy-secondary { background: hsl(var(--secondary)); color: hsl(var(--secondary-foreground)); --deep: hsl(var(--secondary-deep)); }

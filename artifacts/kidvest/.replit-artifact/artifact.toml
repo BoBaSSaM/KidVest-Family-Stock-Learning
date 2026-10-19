@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "KidVest"
+title = "العب و اكسب"
 description = "A bilingual family stock-learning web app with separate parent and kid portals, parent-approved paper trading, lessons and virtual wallets."
 version = "1.0.0"
 id = "artifacts/kidvest"

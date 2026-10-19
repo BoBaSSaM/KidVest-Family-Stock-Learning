@@ -30,7 +30,7 @@ function Inner() {
           <div className="mb-6 flex gap-3 overflow-x-auto pb-2" role="tablist" aria-label={tr("Choose explorer", "اختر مستكشفًا")}>
             {kids.data.map((k) => (
               <button key={k.id} role="tab" aria-selected={kidId === k.id} onClick={() => setKidId(k.id)} data-testid={`tab-kid-${k.id}`}
-                className={cn("flex shrink-0 items-center gap-2 rounded-2xl border-2 py-2 pe-4 ps-2 font-extrabold transition", kidId === k.id ? "border-primary bg-primary text-primary-foreground shadow-[0_4px_0_hsl(var(--primary-deep))]" : "border-border bg-card hover:-translate-y-0.5")}>
+                className={cn("flex shrink-0 items-center gap-2 rounded-2xl border-2 py-2 pe-4 ps-2 font-extrabold transition", kidId === k.id ? "border-primary bg-primary text-primary-foreground shadow-[0_3px_12px_hsl(var(--primary)/0.20)]" : "border-border bg-card hover:-translate-y-0.5")}>
                 <KvAvatar avatar={k.avatar} name={k.name} size={32} />{k.name}
               </button>
             ))}

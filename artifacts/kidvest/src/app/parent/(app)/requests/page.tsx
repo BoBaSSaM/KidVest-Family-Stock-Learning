@@ -31,7 +31,7 @@ export default function ParentRequests() {
           const count = f === "all" ? q.data?.length ?? 0 : (q.data ?? []).filter((r) => r.status === f).length;
           return (
             <button key={f} role="tab" aria-selected={filter === f} onClick={() => setFilter(f)} data-testid={`tab-filter-${f}`}
-              className={cn("rounded-2xl border-2 px-4 py-2 text-sm font-extrabold transition", filter === f ? "border-primary bg-primary text-primary-foreground shadow-[0_4px_0_hsl(var(--primary-deep))]" : "border-border bg-card hover:-translate-y-0.5")}>
+              className={cn("rounded-2xl border-2 px-4 py-2 text-sm font-extrabold transition", filter === f ? "border-primary bg-primary text-primary-foreground shadow-[0_3px_12px_hsl(var(--primary)/0.20)]" : "border-border bg-card hover:-translate-y-0.5")}>
               {labels[f]} <span className="font-num opacity-75">{count}</span>
             </button>
           );

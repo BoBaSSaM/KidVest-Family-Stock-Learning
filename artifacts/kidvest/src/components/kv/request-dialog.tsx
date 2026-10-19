@@ -78,7 +78,7 @@ export function RequestDialog({ target, onOpenChange }: { target: RequestTarget 
             {(["qty", "amount"] as const).map((m) => (
               <button key={m} role="tab" type="button" aria-selected={mode === m}
                 onClick={() => { setMode(m); setValue(m === "qty" ? "1" : String(Math.max(1, Math.round(target.price)))); }}
-                className={cn("rounded-xl py-2 text-sm font-extrabold transition", mode === m ? "bg-card shadow-[0_3px_0_hsl(var(--border))]" : "text-muted-foreground")}
+                className={cn("rounded-xl py-2 text-sm font-extrabold transition", mode === m ? "bg-card shadow-[0_2px_8px_hsl(var(--foreground)/0.10)]" : "text-muted-foreground")}
                 data-testid={`tab-mode-${m}`}>
                 {m === "qty" ? tr("Shares", "أسهم") : tr("Dollar amount", "مبلغ بالدولار")}
               </button>

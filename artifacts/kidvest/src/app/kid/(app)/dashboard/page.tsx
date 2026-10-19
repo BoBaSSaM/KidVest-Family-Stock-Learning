@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { ArrowRight, Compass, GraduationCap, LineChart, PiggyBank, Send, Star, Wallet } from "lucide-react";
+import { ArrowRight, Coins, Compass, GraduationCap, LineChart, Send, Star, Wallet } from "lucide-react";
 import { getGetDashboardQueryKey, useGetDashboard } from "@workspace/api-client-react";
 import { useI18n } from "@/components/i18n";
 import { Disclaimer, EmptyState, ErrorState, KvAvatar, PageSkeleton, Panel, SignedMoney, StatTile, ToyLink } from "@/components/kv/kit";
@@ -44,7 +44,7 @@ export default function KidDashboard() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile label={tr("My wallet", "محفظتي")} value={money(d.balance)} icon={<Wallet className="h-5 w-5" />} tone="secondary" testId="text-balance" />
-        <StatTile label={tr("My backpack", "حقيبتي")} value={money(d.totalValue)} icon={<PiggyBank className="h-5 w-5" />} testId="text-total-value" />
+        <StatTile label={tr("My backpack", "حقيبتي")} value={money(d.totalValue)} icon={<Coins className="h-5 w-5" />} testId="text-total-value" />
         <StatTile label={tr("Up or down", "صعود أو هبوط")} value={<SignedMoney value={d.gainLoss} />} icon={<LineChart className="h-5 w-5" />} tone="accent" />
         <StatTile label={tr("Lessons done", "دروس منجزة")} value={num(d.completedLessonCount, 0)} icon={<GraduationCap className="h-5 w-5" />} tone="danger" />
       </div>
@@ -79,10 +79,10 @@ export default function KidDashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Link href="/kid/explore" className="kv-rise flex items-center gap-4 rounded-[1.75rem] bg-accent p-6 text-accent-foreground shadow-[0_6px_0_hsl(var(--accent-deep))] transition hover:-translate-y-1" data-testid="link-explore">
+        <Link href="/kid/explore" className="kv-rise flex items-center gap-4 rounded-[1.75rem] bg-accent p-6 text-accent-foreground shadow-[0_5px_16px_hsl(var(--accent-deep)/0.18)] transition hover:-translate-y-0.5" data-testid="link-explore">
           <Compass className="h-10 w-10" /><div><p className="font-display text-2xl font-extrabold">{tr("Go exploring", "انطلق للاستكشاف")}</p><p className="font-semibold">{tr("Search any ticker in the world.", "ابحث عن أي رمز في العالم.")}</p></div>
         </Link>
-        <Link href="/kid/learn" className="kv-rise flex items-center gap-4 rounded-[1.75rem] bg-secondary p-6 text-secondary-foreground shadow-[0_6px_0_hsl(var(--secondary-deep))] transition hover:-translate-y-1" data-testid="link-learn">
+        <Link href="/kid/learn" className="kv-rise flex items-center gap-4 rounded-[1.75rem] bg-secondary p-6 text-secondary-foreground shadow-[0_5px_16px_hsl(var(--secondary-deep)/0.18)] transition hover:-translate-y-0.5" data-testid="link-learn">
           <GraduationCap className="h-10 w-10" /><div><p className="font-display text-2xl font-extrabold">{tr("Earn XP", "اكسب نقاط الخبرة")}</p><p className="font-semibold">{tr("Quick lessons, one question each.", "دروس سريعة بسؤال واحد.")}</p></div>
         </Link>
       </div>

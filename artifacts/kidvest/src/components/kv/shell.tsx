@@ -96,7 +96,7 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "group flex items-center gap-3 rounded-2xl px-3.5 py-3 font-extrabold transition-transform hover:-translate-y-0.5",
-                  active ? "bg-primary text-primary-foreground shadow-[0_4px_0_hsl(var(--primary-deep))]" : "text-sidebar-foreground hover:bg-sidebar-accent",
+                  active ? "bg-primary text-primary-foreground shadow-[0_3px_12px_hsl(var(--primary)/0.20)]" : "text-sidebar-foreground hover:bg-sidebar-accent",
                 )}
               >
                 <n.icon className="h-5 w-5" />
