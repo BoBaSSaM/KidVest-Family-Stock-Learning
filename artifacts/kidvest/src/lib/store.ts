@@ -11,7 +11,7 @@ const filename = path.join(process.cwd(), ".data", "learning-demo.json");
 export const storageMode = () => process.env.MONGODB_URI ? "mongodb" : "local-demo";
 async function connect() {
   if (!process.env.MONGODB_URI) throw new HttpError(503, "MongoDB connection is not configured.");
-  cache.connection ??= mongoose.connect(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 10000 }).then(async db => {
+  cache.connection ??= mongoose.connect(process.env.MONGODB_URI, { dbName: "kids_project", serverSelectionTimeoutMS: 10000 }).then(async db => {
     await Promise.all(Object.values(models).map(model => model.init()));
     return db;
   }).catch(() => {

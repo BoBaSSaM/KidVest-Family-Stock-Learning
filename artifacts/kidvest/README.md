@@ -20,7 +20,7 @@ Implemented: parent registration, credentials login with bcrypt/JWT sessions, ro
 
 ## Run the downloaded standalone ZIP
 
-Requirements: Node.js 22 or newer, npm, and a MongoDB Atlas replica set.
+Requirements: Node.js 22 or newer, npm, and a MongoDB Atlas replica set. Family data is stored in the `kids_project` MongoDB database.
 
 ```sh
 cd KidVest
@@ -105,7 +105,7 @@ Do not process real money or treat this as financial advice. Use Stripe test car
 
 ## Stripe test checkout
 
-Provide `STRIPE_SECRET_KEY` with an `sk_test_` key, `DATABASE_URL` for Stripe-managed PostgreSQL sync, and `MONGODB_URI` for application data. On startup the server runs Stripe sync migrations, registers/reuses a managed webhook at the runtime HTTPS app origin, and backfills Stripe objects. `NEXTAUTH_URL` should be your application's trusted public origin; it is also used for auth. Locally, use an HTTPS tunnel or `stripe listen --forward-to localhost:3000/api/stripe/webhook` with its signing secret in `STRIPE_WEBHOOK_SECRET`.
+Provide `STRIPE_SECRET_KEY` with an `sk_test_` key, `DATABASE_URL` for Stripe-managed PostgreSQL sync, and `MONGODB_URI` for application data. Application data uses the `kids_project` database even if the URI names a different default database. On startup the server runs Stripe sync migrations, registers/reuses a managed webhook at the runtime HTTPS app origin, and backfills Stripe objects. `NEXTAUTH_URL` should be your application's trusted public origin; it is also used for auth. Locally, use an HTTPS tunnel or `stripe listen --forward-to localhost:3000/api/stripe/webhook` with its signing secret in `STRIPE_WEBHOOK_SECRET`.
 
 The server creates a Stripe Product and immutable Prices through Stripe's API, never through SQL or Checkout `price_data`. Products, Prices, customers and Checkout Sessions are synced to the managed `stripe` schema. Application payment intents in MongoDB contain ownership, expected amount and parental approval instructions; they are not a parallel Stripe catalog.
 

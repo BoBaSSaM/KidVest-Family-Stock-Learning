@@ -24,7 +24,7 @@ Family stock-learning web app with separate parent and kid portals. All investin
 - Mongoose models: `artifacts/kidvest/src/models`.
 - API source contract: `lib/api-spec/openapi.yaml`; generated client/validation libraries are consumed by KidVest.
 - Credentials auth was explicitly requested: NextAuth, bcrypt, JWT sessions. Requires `NEXTAUTH_SECRET` or existing `SESSION_SECRET`.
-- MongoDB Atlas via `MONGODB_URI`; transactions require replica-set support. Do not migrate to Postgres.
+- MongoDB Atlas via `MONGODB_URI`, using the `kids_project` database; transactions require replica-set support. Do not migrate to Postgres.
 - The shared Express scaffold is unused for this product. Its proxy path is `/internal-api`; Next owns `/api/*`.
 
 ## Product & constraints
