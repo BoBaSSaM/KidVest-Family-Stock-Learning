@@ -21,7 +21,9 @@ export function useDemoLaunch() {
       let demoKey = window.sessionStorage.getItem("kv-demo-key");
       let res = demoKey ? await signIn("credentials", { demoKey, role, redirect: false }) : undefined;
       if (!res || res.error) {
-        demoKey = (await start.mutateAsync()).demoKey;
+        const generatedDemoKey = (await start.mutateAsync()).demoKey;
+        if (!generatedDemoKey) throw new Error("Demo sign-in key was not returned.");
+        demoKey = generatedDemoKey;
         window.sessionStorage.setItem("kv-demo-key", demoKey);
         res = await signIn("credentials", { demoKey, role, redirect: false });
       }
