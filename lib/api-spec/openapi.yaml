@@ -1,36 +1,511 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
-  version: 0.1.0
-  description: API specification
+  version: 1.0.0
 servers:
   - url: /api
-    description: Base API path
-tags:
-  - name: health
-    description: Health operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
-      tags: [health]
-      summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
           content:
             application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+  /kv/register:
+    post:
+      operationId: registerParent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegistrationInput" }
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+  /kv/demo:
+    post:
+      operationId: startDemo
+      responses:
+        "200":
+          description: Isolated demo family login key
+          content:
+            application/json:
               schema:
-                $ref: "#/components/schemas/HealthStatus"
+                type: object
+                required: [demoKey]
+                properties:
+                  demoKey: { type: string }
+  /kv/dashboard:
+    get:
+      operationId: getDashboard
+      responses:
+        "200":
+          description: Role scoped dashboard
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Dashboard" }
+  /kv/kids:
+    get:
+      operationId: getKids
+      responses:
+        "200":
+          description: Own kids
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Kid" } }
+    post:
+      operationId: createKid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/KidInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Kid" }
+  /kv/kids/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    patch:
+      operationId: updateKid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/KidUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Kid" }
+    delete:
+      operationId: deleteKid
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Success" }
+  /kv/requests:
+    get:
+      operationId: getRequests
+      responses:
+        "200":
+          description: Scoped requests
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/StockRequest" } }
+    post:
+      operationId: createRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RequestInput" }
+      responses:
+        "201":
+          description: Pending request
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StockRequest" }
+  /kv/requests/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    patch:
+      operationId: reviewRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReviewInput" }
+      responses:
+        "200":
+          description: Review result, checkoutUrl present when top up is needed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReviewResult" }
+  /kv/portfolio:
+    get:
+      operationId: getPortfolio
+      parameters:
+        - { name: kidId, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Scoped portfolio
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Portfolio" }
+  /kv/activity:
+    get:
+      operationId: getActivity
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Activity" } }
+  /kv/payments:
+    get:
+      operationId: getPayments
+      responses:
+        "200":
+          description: Payment history
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Transaction" } }
+    post:
+      operationId: fundWallet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FundingInput" }
+      responses:
+        "200":
+          description: Demo credits granted or Stripe redirect
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReviewResult" }
+  /kv/settings:
+    get:
+      operationId: getSettings
+      responses:
+        "200":
+          description: Current user preferences
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+    patch:
+      operationId: updateSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SettingsInput" }
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+  /kv/lessons:
+    get:
+      operationId: getLessons
+      responses:
+        "200":
+          description: Lessons and saved progress
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Lesson" } }
+  /kv/lessons/{id}/complete:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: completeLesson
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LessonAnswer" }
+      responses:
+        "200":
+          description: Saved progress
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LessonResult" }
+  /stocks/search:
+    get:
+      operationId: searchStocks
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Stock" } }
+  /stocks/trending:
+    get:
+      operationId: getTrendingStocks
+      responses:
+        "200":
+          description: Popular learning stocks
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Stock" } }
+  /stocks/quote:
+    get:
+      operationId: getStockQuote
+      parameters:
+        - { name: symbol, in: query, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Quote
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Stock" }
+  /stocks/chart:
+    get:
+      operationId: getStockChart
+      parameters:
+        - { name: symbol, in: query, required: true, schema: { type: string } }
+        - { name: range, in: query, required: true, schema: { type: string, enum: [1D, 1W, 1M, 1Y] } }
+      responses:
+        "200":
+          description: Historical chart with data provenance
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StockChart" }
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
-        status:
-          type: string
-      required:
-        - status
-
+        status: { type: string }
+    Success:
+      type: object
+      required: [success]
+      properties:
+        success: { type: boolean }
+    RegistrationInput:
+      type: object
+      required: [name, email, password]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 80 }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8, maxLength: 72 }
+    User:
+      type: object
+      required: [id, name, role, avatar, isDemo, completedLessons, notifications]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string }
+        username: { type: string }
+        role: { type: string, enum: [parent, kid] }
+        avatar: { type: string }
+        age: { type: number }
+        parentId: { type: string }
+        isDemo: { type: boolean }
+        notifications: { type: boolean }
+        completedLessons: { type: array, items: { type: string } }
+    Kid:
+      allOf:
+        - { $ref: "#/components/schemas/User" }
+        - type: object
+          required: [balance, portfolioValue, gainLoss, dailyLimit, monthlyLimit, pendingCount]
+          properties:
+            balance: { type: number }
+            portfolioValue: { type: number }
+            gainLoss: { type: number }
+            dailyLimit: { type: number }
+            monthlyLimit: { type: number }
+            pendingCount: { type: integer }
+    KidInput:
+      type: object
+      required: [name, username, password, age, avatar, dailyLimit, monthlyLimit]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 80 }
+        username: { type: string, minLength: 3, maxLength: 30 }
+        password: { type: string, minLength: 8, maxLength: 72 }
+        age: { type: integer, minimum: 7, maximum: 17 }
+        avatar: { type: string }
+        dailyLimit: { type: number, minimum: 0 }
+        monthlyLimit: { type: number, minimum: 0 }
+    KidUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 2, maxLength: 80 }
+        username: { type: string, minLength: 3, maxLength: 30 }
+        password: { type: string, minLength: 8, maxLength: 72 }
+        age: { type: integer, minimum: 7, maximum: 17 }
+        avatar: { type: string }
+        dailyLimit: { type: number, minimum: 0 }
+        monthlyLimit: { type: number, minimum: 0 }
+    Stock:
+      type: object
+      required: [symbol, name, price, change, changePercent, currency, summary, category, source, updatedAt, marketState]
+      properties:
+        symbol: { type: string }
+        name: { type: string }
+        price: { type: number }
+        change: { type: number }
+        changePercent: { type: number }
+        currency: { type: string }
+        summary: { type: string }
+        category: { type: string }
+        source: { type: string, enum: [live, demo] }
+        updatedAt: { type: string }
+        marketState: { type: string }
+    ChartPoint:
+      type: object
+      required: [date, value]
+      properties:
+        date: { type: string }
+        value: { type: number }
+    StockChart:
+      type: object
+      required: [points, source]
+      properties:
+        points: { type: array, items: { $ref: "#/components/schemas/ChartPoint" } }
+        source: { type: string, enum: [live, demo] }
+    StockRequest:
+      type: object
+      required: [id, kidId, parentId, kidName, kidAvatar, symbol, companyName, quantity, priceAtRequest, totalCost, kidNote, parentComment, status, type, createdAt, source]
+      properties:
+        id: { type: string }
+        kidId: { type: string }
+        parentId: { type: string }
+        kidName: { type: string }
+        kidAvatar: { type: string }
+        symbol: { type: string }
+        companyName: { type: string }
+        quantity: { type: number }
+        priceAtRequest: { type: number }
+        priceAtApproval: { type: number }
+        totalCost: { type: number }
+        kidNote: { type: string }
+        parentComment: { type: string }
+        status: { type: string, enum: [pending, approved, rejected, cancelled] }
+        type: { type: string, enum: [buy, sell] }
+        source: { type: string, enum: [live, demo] }
+        createdAt: { type: string }
+    RequestInput:
+      type: object
+      required: [symbol, quantity, type]
+      properties:
+        symbol: { type: string, minLength: 1, maxLength: 20 }
+        quantity: { type: number, exclusiveMinimum: 0, maximum: 100000 }
+        type: { type: string, enum: [buy, sell] }
+        kidNote: { type: string, maxLength: 500 }
+    ReviewInput:
+      type: object
+      required: [action]
+      properties:
+        action: { type: string, enum: [approve, reject, cancel] }
+        quantity: { type: number, exclusiveMinimum: 0, maximum: 100000 }
+        parentComment: { type: string, maxLength: 500 }
+    ReviewResult:
+      type: object
+      required: [success, message]
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        checkoutUrl: { type: string }
+        missingAmount: { type: number }
+    Holding:
+      type: object
+      required: [id, kidId, symbol, companyName, quantity, avgBuyPrice, currentPrice, value, gainLoss, changePercent, source]
+      properties:
+        id: { type: string }
+        kidId: { type: string }
+        symbol: { type: string }
+        companyName: { type: string }
+        quantity: { type: number }
+        avgBuyPrice: { type: number }
+        currentPrice: { type: number }
+        value: { type: number }
+        gainLoss: { type: number }
+        changePercent: { type: number }
+        source: { type: string }
+    Portfolio:
+      type: object
+      required: [holdings, totalValue, totalCost, gainLoss, balance, history]
+      properties:
+        holdings: { type: array, items: { $ref: "#/components/schemas/Holding" } }
+        totalValue: { type: number }
+        totalCost: { type: number }
+        gainLoss: { type: number }
+        balance: { type: number }
+        history: { type: array, items: { $ref: "#/components/schemas/Transaction" } }
+    Activity:
+      type: object
+      required: [id, action, details, createdAt, actorName]
+      properties:
+        id: { type: string }
+        action: { type: string }
+        details: { type: string }
+        createdAt: { type: string }
+        actorName: { type: string }
+    Transaction:
+      type: object
+      required: [id, kidId, kidName, amount, type, status, createdAt, isDemo]
+      properties:
+        id: { type: string }
+        kidId: { type: string }
+        kidName: { type: string }
+        amount: { type: number }
+        type: { type: string, enum: [deposit, purchase, sale, refund] }
+        status: { type: string }
+        createdAt: { type: string }
+        isDemo: { type: boolean }
+        receiptUrl: { type: string }
+    FundingInput:
+      type: object
+      required: [kidId, amount]
+      properties:
+        kidId: { type: string }
+        amount: { type: number, minimum: 1, maximum: 10000 }
+    SettingsInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 2, maxLength: 80 }
+        email: { type: string, format: email }
+        notifications: { type: boolean }
+        currentPassword: { type: string }
+        newPassword: { type: string, minLength: 8, maxLength: 72 }
+    Lesson:
+      type: object
+      required: [id, title, description, content, duration, category, question, options, completed, xp]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        content: { type: string }
+        duration: { type: string }
+        category: { type: string }
+        question: { type: string }
+        options: { type: array, items: { type: string } }
+        completed: { type: boolean }
+        xp: { type: integer }
+    LessonAnswer:
+      type: object
+      required: [answer]
+      properties:
+        answer: { type: integer, minimum: 0, maximum: 3 }
+    LessonResult:
+      type: object
+      required: [correct, message, xp]
+      properties:
+        correct: { type: boolean }
+        message: { type: string }
+        xp: { type: integer }
+    Dashboard:
+      type: object
+      required: [user, kids, totalValue, balance, gainLoss, pendingCount, requests, activity, chart, completedLessonCount, xp, marketSource, storageMode, stripeEnabled]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        kids: { type: array, items: { $ref: "#/components/schemas/Kid" } }
+        totalValue: { type: number }
+        balance: { type: number }
+        gainLoss: { type: number }
+        pendingCount: { type: integer }
+        requests: { type: array, items: { $ref: "#/components/schemas/StockRequest" } }
+        activity: { type: array, items: { $ref: "#/components/schemas/Activity" } }
+        chart: { type: array, items: { $ref: "#/components/schemas/ChartPoint" } }
+        completedLessonCount: { type: integer }
+        xp: { type: integer }
+        marketSource: { type: string }
+        storageMode: { type: string }
+        stripeEnabled: { type: boolean }

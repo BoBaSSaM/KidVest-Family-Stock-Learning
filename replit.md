@@ -1,45 +1,41 @@
-# [Project name]
+# KidVest
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Family stock-learning web app with separate parent and kid portals. All investing is virtual paper trading; no brokerage connection. Show “Educational use only. Not financial advice.”
 
-## Run & Operate
+## Run & operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Managed workflow: `artifacts/kidvest: web` runs Next.js on its artifact-assigned PORT.
+- `pnpm --filter @workspace/kidvest run typecheck`
+- `pnpm --filter @workspace/kidvest run build`
+- `pnpm --filter @workspace/api-spec run codegen`
+- `pnpm --filter @workspace/kidvest run export` creates a standalone npm-compatible ZIP under ignored `generated-artifacts/`.
+- `pnpm --filter @workspace/kidvest run seed` creates synthetic demo accounts with a randomly generated password printed once locally.
 
-## Stack
+## Stack & layout
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Next.js App Router, TypeScript, Tailwind4, shadcn/Radix, Framer Motion, Recharts.
+- Frontend and APIs: `artifacts/kidvest/src/app`.
+- Shared UI: `artifacts/kidvest/src/components`.
+- Backend services: `artifacts/kidvest/src/lib`.
+- Mongoose models: `artifacts/kidvest/src/models`.
+- API source contract: `lib/api-spec/openapi.yaml`; generated client/validation libraries are consumed by KidVest.
+- Credentials auth was explicitly requested: NextAuth, bcrypt, JWT sessions. Requires `NEXTAUTH_SECRET` or existing `SESSION_SECRET`.
+- MongoDB Atlas via `MONGODB_URI`; transactions require replica-set support. Do not migrate to Postgres.
+- The shared Express scaffold is unused for this product. Its proxy path is `/internal-api`; Next owns `/api/*`.
 
-## Where things live
+## Product & constraints
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- Arabic RTL / English LTR, light/dark modes.
+- Kids can only request buys/sells. Parents approve, reject, edit quantities and set per-child limits.
+- USD virtual wallets; non-USD stocks may be explored but cannot be requested without an explicit future FX implementation.
+- Spending limits use UTC calendar day/month. Zero prevents spending.
+- Actual quotes are server-only Yahoo Finance calls cached 60s. Do not silently substitute demo prices on live errors.
+- Popular stocks are curated learning choices, not a market-ranked trending list.
+- Demo visitors get isolated random-key families. Sample prices/charts and credits must be labeled demo. No real payment occurs.
+- Portfolio dashboard history is invested cost from transaction records, not historical market performance.
 
-## Architecture decisions
+## Pending production work
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+Stripe is NOT connected. Non-demo checkout and webhook fail closed. Real-account funding, signed/idempotent webhooks, receipts and automatic insufficient-balance approval resumption require setup and implementation. Do not say payments or the complete funded flow work end to end.
 
-## Product
-
-_Describe the high-level user-facing capabilities of this app once they exist._
-
-## User preferences
-
-_Populate as you build — explicit user instructions worth remembering across sessions._
-
-## Gotchas
-
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+Before a public launch: finish Stripe test integration, shared rate limiting, JWT revocation, privacy/parental consent review, security/accessibility testing, provider terms review. Read the app README for current limitations.

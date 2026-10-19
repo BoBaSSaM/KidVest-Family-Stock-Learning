@@ -1,0 +1,1 @@
+- [Framework security constraint](framework-security.md) — preserve the supported Next.js upgrade rather than restoring the original blocked version.

@@ -1,0 +1,79 @@
+Build a complete, production-ready full-stack web app called "KidVest" using Next.js 14 (App Router) with TypeScript, Tailwind CSS and shadcn/ui. It is a family stock-learning platform with TWO SEPARATE PORTALS: a Parent portal and a Kid portal. Deliver a polished, ready-to-use UI/UX, and make sure the whole project can be downloaded as a clean ZIP (include README.md, .env.example, and setup instructions).
+
+## TECH STACK
+- Next.js 14 App Router + TypeScript
+- Tailwind CSS + shadcn/ui + Framer Motion + Recharts (for charts)
+- MongoDB with Mongoose (MongoDB Atlas connection via MONGODB_URI)
+- NextAuth.js (Auth.js) with Credentials provider, bcrypt password hashing, JWT sessions
+- Stripe (Checkout + Webhooks)
+- Yahoo Finance data via the `yahoo-finance2` npm package, called only from server-side API routes (never from the browser), with caching (60 seconds) to avoid rate limits
+
+## ROLES & AUTHORIZATION
+Two roles: "parent" and "kid".
+- Parents register themselves at /parent/register and log in at /parent/login.
+- Kid accounts are created ONLY by a parent (name, username, password, age, avatar). Kids log in at /kid/login.
+- Each kid is linked to exactly one parent (parentId).
+- Use Next.js middleware + server-side checks so:
+  - /parent/* routes are accessible only to role "parent"
+  - /kid/* routes are accessible only to role "kid"
+  - A parent can only see and manage their OWN kids' data
+  - A kid can only see their own data
+  - All API routes validate session and role, and return 401/403 properly
+- Validate all inputs with Zod. Add rate limiting on login routes.
+
+## PART 1: KID PORTAL (/kid/*) — fun, colorful, simple, mobile-first
+Pages:
+1. Dashboard: greeting with avatar, virtual balance, portfolio value, profit/loss, mini chart, and status of recent requests (pending / approved / rejected).
+2. Explore Stocks: search any stock by name or ticker (Yahoo Finance search), with a trending/popular list. Kid can pick ANY stock they want.
+3. Stock Details: live price, daily change %, 1D/1W/1M/1Y price chart, company summary in simple kid-friendly wording, and a "Request to Buy" button.
+4. Buy Request modal: choose number of shares (or amount), shows estimated cost at the current price, optional note to parents ("Why I want this stock"), then submit. The request is saved with status "pending".
+5. My Requests: list with statuses and parent comments.
+6. My Portfolio: approved holdings with live prices, gain/loss, and allocation chart.
+7. Learning corner: short, simple lessons on what a stock is, risk, and diversification, plus badges/achievements for the kid.
+Kids can NEVER execute a purchase directly. Every buy or sell action must go through a parent request.
+
+## PART 2: PARENT PORTAL (/parent/*) — clean, professional dashboard
+Pages:
+1. Dashboard: overview of all kids, total family portfolio value, pending requests count, recent activity.
+2. Kids Management: add, edit, delete kids, reset kid password, set spending limit per kid (daily/monthly).
+3. Requests Center: all pending requests with kid name, stock, current price, quantity, total cost, kid's note. Actions: Approve, Reject (with optional comment), or Edit quantity then approve. Show a real-time price at the time of review and store the price at approval.
+4. Kid Portfolio view: holdings and history for each kid.
+5. Payments: add funds to a kid's virtual wallet via Stripe Checkout; payment history; invoices/receipts.
+6. Settings: profile, change password, notification preferences, per-kid limits.
+7. Activity log of all approvals, rejections, and payments.
+
+## STRIPE INTEGRATION
+- Parents fund their kid's wallet using Stripe Checkout (one-time payments, amount chosen by parent).
+- Also, when a parent approves a request, the purchase is paid from the kid's wallet. If the wallet balance is insufficient, redirect the parent to Stripe Checkout to top up the exact missing amount, then complete the approval automatically after payment succeeds.
+- Create a Stripe webhook endpoint /api/stripe/webhook (verify signature) handling checkout.session.completed and payment_intent.payment_failed, and update wallet balance and transactions idempotently.
+- Env vars: STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET.
+- Use Stripe TEST mode by default.
+
+## MONGODB MODELS
+- User: name, email/username, passwordHash, role, parentId (for kids), avatar, age, createdAt
+- Wallet: kidId, balance, currency
+- StockRequest: kidId, parentId, symbol, companyName, quantity, priceAtRequest, priceAtApproval, totalCost, kidNote, parentComment, status (pending/approved/rejected/cancelled), type (buy/sell), timestamps
+- Holding: kidId, symbol, quantity, avgBuyPrice
+- Transaction: parentId, kidId, stripeSessionId, amount, type (deposit/purchase/refund), status, createdAt
+- ActivityLog: actorId, action, details, createdAt
+Add proper indexes (e.g., on parentId, kidId, status, symbol).
+
+## YAHOO FINANCE API ROUTES (server-side)
+- GET /api/stocks/search?q=
+- GET /api/stocks/quote?symbol=
+- GET /api/stocks/chart?symbol=&range=
+- GET /api/stocks/trending
+All protected by auth, with error handling and a fallback UI when the market is closed or data is unavailable.
+
+## UI/UX REQUIREMENTS
+- Two distinct visual themes: Kid portal = playful, bright colors, large buttons, friendly icons, subtle animations; Parent portal = clean, trustworthy, dashboard style.
+- Fully responsive, light/dark mode, loading skeletons, toast notifications, empty states, and error pages.
+- Landing page at "/" with two big entry buttons: "I'm a Parent" and "I'm a Kid".
+- Accessible (labels, contrast, keyboard navigation).
+
+## IMPORTANT NOTES
+- The investing is a PAPER-TRADING / educational simulation inside the app (virtual holdings tracked in MongoDB using real Yahoo Finance prices). Do not connect to a real brokerage. Show a clear disclaimer: "Educational use only. Not financial advice."
+- Seed script (npm run seed) creating a demo parent, two demo kids, and sample requests.
+- Clean folder structure (app/(parent), app/(kid), app/api, components, lib, models, middleware.ts), reusable components, comments in key files.
+- Provide .env.example with: MONGODB_URI, NEXTAUTH_SECRET, NEXTAUTH_URL, STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET.
+- Make sure the app runs with `npm install && npm run dev` with no errors, and finish by confirming everything works end to end: parent registers, creates a kid, funds the wallet, kid requests a stock, and the parent approves or rejects it.

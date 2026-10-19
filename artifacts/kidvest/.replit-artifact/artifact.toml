@@ -1,0 +1,29 @@
+kind = "web"
+previewPath = "/"
+title = "KidVest"
+description = "A bilingual family stock-learning web app with separate parent and kid portals, parent-approved paper trading, lessons and virtual wallets."
+version = "1.0.0"
+id = "artifacts/kidvest"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19617
+
+[services.development]
+run = "pnpm --filter @workspace/kidvest run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/kidvest", "run", "build" ]
+
+[services.production.run]
+args = [ "pnpm", "--filter", "@workspace/kidvest", "run", "start" ]
+
+[services.production.run.env]
+PORT = "19617"
+NODE_ENV = "production"
+
+[services.env]
+PORT = "19617"
+BASE_PATH = "/"
