@@ -30,6 +30,7 @@ Family stock-learning web app with separate parent and kid portals. All investin
 ## Product & constraints
 
 - Arabic RTL / English LTR, light/dark modes.
+- Show one Kids Offer with the parent dashboard included; this is an offer presentation, not paid subscription billing.
 - Kids can only request buys/sells. Parents approve, reject, edit quantities and set per-child limits.
 - USD virtual wallets; non-USD stocks may be explored but cannot be requested without an explicit future FX implementation.
 - Spending limits use UTC calendar day/month. Zero prevents spending.

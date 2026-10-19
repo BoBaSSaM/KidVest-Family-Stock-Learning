@@ -1,13 +1,12 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useEffect } from "react";
 import {
   ArrowRight, BadgeCheck, Compass, GraduationCap, HandCoins, LineChart, Lock, MessageCircleHeart, ShieldCheck, Telescope, Users,
 } from "lucide-react";
 import { useI18n } from "@/components/i18n";
 import { Disclaimer, LangToggle, Logo, ThemeToggle, ToyLink } from "@/components/kv/kit";
-import { DemoButton } from "@/components/kv/auth";
 import { useKvUser } from "@/components/kv/shell";
 
 export default function Landing() {
@@ -58,10 +57,6 @@ export default function Landing() {
               "«العب و اكسب» تتيح للأطفال من ٧ إلى ١٢ عامًا اكتشاف شركات حقيقية وطلب استثمارات افتراضية. وكل قرار يمرّ أولًا عبر أحد الوالدين.",
             )}
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <DemoButton role="parent" size="lg" />
-            <DemoButton role="kid" size="lg" />
-          </div>
         </div>
         <div className="relative">
           <div className="absolute inset-6 rounded-full bg-primary/15 blur-3xl" />
@@ -69,26 +64,41 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-5 px-4 py-8 md:grid-cols-2 md:px-6" aria-label={tr("Choose your door", "اختر بابك")}>
-        <Entrance
-          href="/parent/login"
-          testId="link-entrance-parent"
-          className="bg-primary text-primary-foreground shadow-[0_10px_0_hsl(var(--primary-deep))]"
-          kicker={tr("I'm a parent", "أنا أحد الوالدين")}
-          title={tr("Open the family cockpit", "افتح لوحة العائلة")}
-          body={tr("Create kid accounts, set daily and monthly limits, review every request.", "أنشئ حسابات الأطفال، حدّد الحدود اليومية والشهرية، وراجع كل طلب.")}
-          icon={<Users className="h-9 w-9" />}
-          extra={<Link href="/parent/register" className="text-sm font-extrabold underline underline-offset-4" data-testid="link-entrance-register">{tr("New here? Create a family", "جديد؟ أنشئ عائلة")}</Link>}
-        />
-        <Entrance
-          href="/kid/login"
-          testId="link-entrance-kid"
-          className="bg-accent text-accent-foreground shadow-[0_10px_0_hsl(var(--accent-deep))]"
-          kicker={tr("I'm a Kid", "أنا طفل")}
-          title={tr("Start my adventure", "ابدأ مغامرتي")}
-          body={tr("Log in with the username your parent made for you and go exploring.", "سجّل الدخول باسم المستخدم الذي أنشأه والداك وابدأ الاستكشاف.")}
-          icon={<Compass className="h-9 w-9" />}
-        />
+      <section className="mx-auto max-w-6xl px-4 py-8 md:px-6" aria-label={tr("Kids Offer", "عرض الأطفال")}>
+        <div className="toy-card grid gap-8 overflow-hidden p-7 md:grid-cols-[1.15fr_0.85fr] md:p-10">
+          <div>
+            <span className="toy-chip bg-accent/40 text-accent-foreground dark:text-accent">{tr("The Kids Offer", "عرض الأطفال")}</span>
+            <h2 className="font-display mt-4 text-3xl font-extrabold md:text-4xl">
+              {tr("One offer for kids. Parent dashboard included.", "عرض واحد للأطفال، ولوحة الوالدين مشمولة.")}
+            </h2>
+            <p className="mt-3 max-w-xl font-semibold text-muted-foreground">
+              {tr(
+                "Kids get lessons and virtual investing. Parents get the dashboard to create child accounts, set limits and review requests—all included in the same offer.",
+                "يحصل الأطفال على الدروس والاستثمار الافتراضي، ويحصل الوالدان على لوحة لإضافة حسابات الأطفال وتحديد الحدود ومراجعة الطلبات—كلها مشمولة في العرض نفسه.",
+              )}
+            </p>
+            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+              <ToyLink href="/parent/register" size="lg" data-testid="link-kids-offer">
+                {tr("Get started with the Kids Offer", "ابدأ بعرض الأطفال")} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+              </ToyLink>
+              <Link href="/kid/login" className="text-sm font-extrabold text-muted-foreground underline underline-offset-4 hover:text-foreground" data-testid="link-kid-signin">
+                {tr("Already have a kid account? Sign in", "لديك حساب طفل؟ سجّل الدخول")}
+              </Link>
+            </div>
+          </div>
+          <ul className="grid content-center gap-3 sm:grid-cols-2 md:grid-cols-1">
+            {[
+              { icon: Compass, text: tr("A fun learning adventure for kids", "مغامرة تعليمية ممتعة للأطفال") },
+              { icon: GraduationCap, text: tr("Lessons and virtual investing", "دروس واستثمار افتراضي") },
+              { icon: Users, text: tr("Parent dashboard included", "لوحة الوالدين مشمولة") },
+              { icon: BadgeCheck, text: tr("Parent-reviewed requests and limits", "طلبات وحدود يراجعها الوالدان") },
+            ].map(({ icon: Icon, text }) => (
+              <li key={text} className="flex items-center gap-3 rounded-2xl bg-secondary/50 p-4 font-extrabold">
+                <Icon className="h-5 w-5 shrink-0 text-primary" />{text}
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-14 md:px-6">
@@ -150,28 +160,6 @@ export default function Landing() {
           <Disclaimer className="max-w-xl" />
         </div>
       </footer>
-    </div>
-  );
-}
-
-function Entrance({
-  href, kicker, title, body, icon, className, extra, testId,
-}: { href: string; kicker: string; title: string; body: string; icon: ReactNode; className: string; extra?: ReactNode; testId: string }) {
-  return (
-    <div className={`kv-rise group relative overflow-hidden rounded-[2.25rem] p-7 transition-transform hover:-translate-y-1 md:p-9 ${className}`}>
-      <div className="absolute -end-10 -top-10 h-44 w-44 rounded-full bg-white/10 transition-transform group-hover:scale-110" />
-      <div className="relative flex items-start justify-between">
-        <span className="text-xs font-black uppercase tracking-[0.2em] opacity-80">{kicker}</span>
-        <span className="grid h-16 w-16 rotate-6 place-items-center rounded-3xl bg-white/20">{icon}</span>
-      </div>
-      <h3 className="font-display relative mt-6 text-3xl font-extrabold md:text-4xl">{title}</h3>
-      <p className="relative mt-2 max-w-sm font-semibold opacity-90">{body}</p>
-      <div className="relative mt-6 flex flex-wrap items-center gap-4">
-        <Link href={href} data-testid={testId} className="inline-flex h-12 items-center gap-2 rounded-2xl bg-card px-6 font-extrabold text-foreground shadow-[0_4px_12px_hsl(var(--foreground)/0.12)] transition hover:shadow-[0_6px_18px_hsl(var(--foreground)/0.16)] active:translate-y-0.5">
-          {title} <ArrowRight className="h-4 w-4 rtl:rotate-180" />
-        </Link>
-        {extra}
-      </div>
     </div>
   );
 }
