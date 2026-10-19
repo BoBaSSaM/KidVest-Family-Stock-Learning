@@ -241,6 +241,7 @@ export interface ReviewInput {
   quantity?: number;
   /** @maxLength 500 */
   parentComment?: string;
+  fundWithStripe?: boolean;
 }
 
 export interface ReviewResult {
@@ -274,6 +275,14 @@ export const TransactionType = {
   refund: 'refund',
 } as const;
 
+export type TransactionPaymentProvider = typeof TransactionPaymentProvider[keyof typeof TransactionPaymentProvider];
+
+
+export const TransactionPaymentProvider = {
+  demo: 'demo',
+  stripe_test: 'stripe_test',
+} as const;
+
 export interface Transaction {
   id: string;
   kidId: string;
@@ -284,6 +293,7 @@ export interface Transaction {
   createdAt: string;
   isDemo: boolean;
   receiptUrl?: string;
+  paymentProvider?: TransactionPaymentProvider;
 }
 
 export interface Portfolio {
@@ -310,6 +320,43 @@ export interface FundingInput {
      * @maximum 10000
      */
   amount: number;
+  useStripe?: boolean;
+}
+
+export interface PaymentConfirmation {
+  /**
+     * @minLength 10
+     * @maxLength 255
+     */
+  sessionId: string;
+  cancelled?: boolean;
+}
+
+export type PaymentStatusStatus = typeof PaymentStatusStatus[keyof typeof PaymentStatusStatus];
+
+
+export const PaymentStatusStatus = {
+  pending: 'pending',
+  completed: 'completed',
+  failed: 'failed',
+  expired: 'expired',
+} as const;
+
+export type PaymentStatusApprovalStatus = typeof PaymentStatusApprovalStatus[keyof typeof PaymentStatusApprovalStatus];
+
+
+export const PaymentStatusApprovalStatus = {
+  none: 'none',
+  approved: 'approved',
+  deferred: 'deferred',
+} as const;
+
+export interface PaymentStatus {
+  status: PaymentStatusStatus;
+  approvalStatus: PaymentStatusApprovalStatus;
+  message: string;
+  amount: number;
+  receiptUrl?: string;
 }
 
 export interface SettingsInput {
@@ -378,6 +425,19 @@ export type StartDemo200 = {
 
 export type GetPortfolioParams = {
 kidId?: string;
+};
+
+export type GetPaymentSetup200Mode = typeof GetPaymentSetup200Mode[keyof typeof GetPaymentSetup200Mode];
+
+
+export const GetPaymentSetup200Mode = {
+  test: 'test',
+  unavailable: 'unavailable',
+} as const;
+
+export type GetPaymentSetup200 = {
+  enabled: boolean;
+  mode: GetPaymentSetup200Mode;
 };
 
 export type SearchStocksParams = {

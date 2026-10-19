@@ -1,2 +1,3 @@
 - [Framework security constraint](framework-security.md) — preserve the supported Next.js upgrade rather than restoring the original blocked version.
 - [Stripe connection boundary](stripe-connection.md) — the generic API connector does not supply the native server credentials required by managed sync.
+- [Funded approval safety](funded-approval-safety.md) — exact-amount checkout uses a bounded review snapshot; confirmed deposits survive deferred approvals.

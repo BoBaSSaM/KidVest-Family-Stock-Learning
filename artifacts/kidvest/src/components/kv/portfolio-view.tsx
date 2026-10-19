@@ -86,6 +86,7 @@ export function LedgerList({ history, showKid }: { history: Transaction[]; showK
                   <p className="text-xs font-bold text-muted-foreground">{dateTime(t.createdAt)} · {t.status}</p>
                 </div>
                 {t.isDemo && <Chip tone="accent">{tr("Virtual credit", "رصيد افتراضي")}</Chip>}
+                {t.paymentProvider === "stripe_test" && <Chip tone="accent">{tr("Stripe TEST", "Stripe تجريبي")}</Chip>}
                 {t.receiptUrl && <a href={t.receiptUrl} target="_blank" rel="noreferrer" className="text-xs font-extrabold text-primary underline">{tr("Receipt", "الإيصال")}</a>}
                 <span className={cn("font-num font-bold", inflow ? "text-secondary" : "text-foreground")}>{inflow ? "+" : "-"}{money(Math.abs(t.amount))}</span>
               </li>

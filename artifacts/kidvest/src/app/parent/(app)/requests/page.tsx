@@ -75,20 +75,23 @@ function PendingCard({ r }: { r: StockRequest }) {
   const [qty, setQty] = useState(String(r.quantity));
   const [comment, setComment] = useState("");
   const [checkout, setCheckout] = useState<string | null>(null);
+  const [missing, setMissing] = useState<number | null>(null);
   const quote = useGetStockQuote({ symbol: r.symbol }, { query: { queryKey: getGetStockQuoteQueryKey({ symbol: r.symbol }), refetchInterval: 60_000 } });
   const price = quote.data?.price ?? r.priceAtRequest;
   const n = Number(qty);
   const qtyOk = Number.isFinite(n) && n > 0 && n <= 100000;
   const drift = r.priceAtRequest ? ((price - r.priceAtRequest) / r.priceAtRequest) * 100 : 0;
 
-  const act = (action: "approve" | "reject") => {
+  const act = (action: "approve" | "reject", fundWithStripe = false) => {
     review.mutate(
-      { id: r.id, data: { action, quantity: action === "approve" ? n : undefined, parentComment: comment.trim() || undefined } },
+      { id: r.id, data: { action, quantity: action === "approve" ? n : undefined, parentComment: comment.trim() || undefined, fundWithStripe } },
       {
         onSuccess: (res) => {
+          if (res.checkoutUrl) { setCheckout(res.checkoutUrl); window.location.assign(res.checkoutUrl); return; }
           if (res.success) toast.success(res.message || (action === "approve" ? tr("Approved", "تمت الموافقة") : tr("Declined", "تم الرفض")));
           else {
             toast.error(res.message, { description: res.missingAmount ? `${tr("Missing", "ينقص")} ${money(res.missingAmount)}` : undefined });
+            setMissing(res.missingAmount ?? null);
             if (res.checkoutUrl) setCheckout(res.checkoutUrl);
           }
           invalidate();
@@ -137,6 +140,10 @@ function PendingCard({ r }: { r: StockRequest }) {
           <ExternalLink className="h-4 w-4" />{tr("Open secure checkout to add funds", "افتح صفحة الدفع الآمن لإضافة رصيد")}
         </a>
       )}
+      {missing !== null && <div className="rounded-2xl border-2 border-accent p-4 text-sm font-bold">
+        <p>{tr(`The wallet needs ${money(missing)}. You can add demo credits from Payments, or use Stripe test Checkout below. The reviewed price is held for 35 minutes; no real charge occurs.`, `تحتاج المحفظة ${money(missing)}. أضف رصيدًا تجريبيًا من المدفوعات أو استخدم دفع Stripe التجريبي أدناه. يُحفظ سعر المراجعة ٣٥ دقيقة؛ لا يحدث خصم حقيقي.`)}</p>
+        <ToyButton className="mt-3" disabled={review.isPending || !qtyOk || !quote.data || !!quote.error} onClick={() => act("approve", true)}>{tr(`Test-pay ${money(missing)} and approve`, `ادفع تجريبيًا ${money(missing)} ووافق`)}</ToyButton>
+      </div>}
       <div className="flex flex-wrap gap-3">
         <ToyButton variant="secondary" disabled={!qtyOk || review.isPending || !quote.data || !!quote.error} onClick={() => act("approve")} data-testid={`button-approve-${r.id}`}><Check className="h-5 w-5" />{tr("Approve at current quote", "وافق بالسعر الحالي")}</ToyButton>
         <ToyButton variant="outline" disabled={review.isPending} onClick={() => act("reject")} data-testid={`button-reject-${r.id}`}><X className="h-5 w-5" />{tr("Decline", "ارفض")}</ToyButton>

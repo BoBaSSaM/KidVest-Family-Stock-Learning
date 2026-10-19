@@ -4,6 +4,7 @@
  * Api
  * OpenAPI spec version: 1.0.0
  */
+import type { TransactionPaymentProvider } from './transactionPaymentProvider';
 import type { TransactionType } from './transactionType';
 
 export interface Transaction {
@@ -16,4 +17,5 @@ export interface Transaction {
   createdAt: string;
   isDemo: boolean;
   receiptUrl?: string;
+  paymentProvider?: TransactionPaymentProvider;
 }

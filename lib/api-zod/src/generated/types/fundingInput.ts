@@ -12,4 +12,5 @@ export interface FundingInput {
      * @maximum 10000
      */
   amount: number;
+  useStripe?: boolean;
 }

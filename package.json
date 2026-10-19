@@ -15,6 +15,7 @@
     "stripe-replit-sync": "^1.0.0"
   },
   "devDependencies": {
+    "playwright-core": "^1.64.1",
     "prettier": "^3.9.6",
     "typescript": "~5.9.3"
   }

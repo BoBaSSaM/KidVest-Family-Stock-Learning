@@ -15,4 +15,5 @@ export interface ReviewInput {
   quantity?: number;
   /** @maxLength 500 */
   parentComment?: string;
+  fundWithStripe?: boolean;
 }

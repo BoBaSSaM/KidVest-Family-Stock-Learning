@@ -27,11 +27,19 @@ const transactionSchema = new Schema({
   ...base, parentId: { type: String, index: true }, kidId: { type: String, index: true },
   kidName: String, amount: Number, type: String, status: String,
   createdAt: String, isDemo: Boolean, receiptUrl: String, stripeSessionId: String,
-  symbol: String, quantity: Number,
+  symbol: String, quantity: Number, paymentProvider: String,
 }, { versionKey: false });
 transactionSchema.index({ stripeSessionId: 1 }, { unique: true, sparse: true });
 const activitySchema = new Schema({ ...base, parentId: { type: String, index: true }, actorId: String, kidId: String, actorName: String, action: String, details: String, createdAt: String }, { versionKey: false });
 activitySchema.index({ parentId: 1, createdAt: -1 });
+const paymentSchema = new Schema({
+  ...base, parentId: { type: String, index: true }, kidId: { type: String, index: true },
+  amountCents: Number, stripeSessionId: String, requestId: String, quantity: Number,
+  approvalPrice: Number, source: String, parentComment: String, status: String,
+  approvalStatus: String, message: String, receiptUrl: String, createdAt: String, expiresAt: String,
+}, { versionKey: false });
+paymentSchema.index({ stripeSessionId: 1 }, { unique: true, sparse: true });
+paymentSchema.index({ parentId: 1, requestId: 1, status: 1 });
 export const models = {
   users: mongoose.models.User || mongoose.model("User", userSchema),
   wallets: mongoose.models.Wallet || mongoose.model("Wallet", walletSchema),
@@ -39,4 +47,5 @@ export const models = {
   holdings: mongoose.models.Holding || mongoose.model("Holding", holdingSchema),
   transactions: mongoose.models.Transaction || mongoose.model("Transaction", transactionSchema),
   activity: mongoose.models.ActivityLog || mongoose.model("ActivityLog", activitySchema),
+  paymentAttempts: mongoose.models.PaymentAttempt || mongoose.model("PaymentAttempt", paymentSchema),
 };

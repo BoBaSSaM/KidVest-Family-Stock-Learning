@@ -8,13 +8,13 @@ A family stock-learning web application with separate parent and kid portals. Al
 
 Implemented: parent registration, credentials login with bcrypt/JWT sessions, role-guarded portals, family ownership checks, kid creation/edit/deletion/password reset, daily/monthly limits, buy/sell requests, approve/reject/quantity edits, virtual holdings and transaction history, market search/quotes/charts, lessons/quizzes/badges, activity log, and profile settings.
 
-**Stripe is not connected in this build.** Real-account funding deliberately fails with a clear error. Demo accounts can receive clearly labeled virtual demo credits; no payment is taken. The webhook endpoint returns 503 and processes no events. Stripe Checkout, signature-verified idempotent webhooks, receipts, and automatic post-payment approvals still require integration setup and implementation. Do not describe the payment flow as verified.
+**Stripe test mode only.** Hosted Checkout supports wallet top-ups and the exact missing amount for parent-approved purchases. Stripe-managed webhooks verify raw-body signatures before processing; repeated events cannot duplicate wallet credits or approvals. Demo credits remain a separate, explicit option. Live-mode keys/events are rejected. No real money or real stock trades are supported.
 
 ## Stack
 
 - Next.js App Router + TypeScript. The requested Next.js 14 package was rejected by the security registry; this project uses supported Next.js 16.
 - React, Tailwind CSS, shadcn/Radix components, Framer Motion, Recharts, TanStack Query.
-- MongoDB + Mongoose, six separate indexed collections.
+- MongoDB + Mongoose for family data, financial ledgers and payment/approval intents. PostgreSQL is used only by Stripe-managed sync.
 - NextAuth credentials provider, bcrypt password hashing, JWT session cookies.
 - yahoo-finance2, server-side only, 60-second cache.
 
@@ -97,6 +97,22 @@ If MongoDB is absent in development, a **development-only** local JSON learning 
 
 ## Before a public launch
 
-Connect and finish Stripe **test mode**, configure a signature-verifying webhook and idempotent wallet credits, test failure/retry cases and exact-missing-amount approval resumption. Complete a MongoDB-backed multi-session functional check, shared rate limiting, JWT revocation, privacy/parental-consent review, child safety review, legal/provider terms review, accessibility testing and production security review. The first build is not a certification of production readiness.
+Complete shared rate limiting, immediate JWT revocation, privacy/parental-consent review, child safety review, legal/provider terms review, accessibility testing and production security review. This build is not a certification of production readiness.
 
-The requested end-to-end Stripe-funded purchase flow has **not** been verified. Do not process real money or treat this as financial advice.
+Do not process real money or treat this as financial advice. Use Stripe test cards only.
+
+## Stripe test checkout
+
+Provide `STRIPE_SECRET_KEY` with an `sk_test_` key, `DATABASE_URL` for Stripe-managed PostgreSQL sync, and `MONGODB_URI` for application data. On startup the server runs Stripe sync migrations, registers/reuses a managed webhook at the runtime HTTPS app origin, and backfills Stripe objects. `NEXTAUTH_URL` should be your application's trusted public origin; it is also used for auth. Locally, use an HTTPS tunnel or `stripe listen --forward-to localhost:3000/api/stripe/webhook` with its signing secret in `STRIPE_WEBHOOK_SECRET`.
+
+The server creates a Stripe Product and immutable Prices through Stripe's API, never through SQL or Checkout `price_data`. Products, Prices, customers and Checkout Sessions are synced to the managed `stripe` schema. Application payment intents in MongoDB contain ownership, expected amount and parental approval instructions; they are not a parallel Stripe catalog.
+
+Parents can top up from Payments. Demo families default to instant sample credits; explicitly switch on **Stripe TEST Checkout** to exercise the actual hosted test flow. A successful return is rechecked with Stripe server-side: URL parameters alone cannot credit a wallet. Cancellation expires the session. The test receipt and amount appear in payment history; pending returns are retried for up to a minute.
+
+For an insufficient-balance buy, parent approval opens Checkout for exactly the missing amount (demo accounts first offer an explicit Stripe button). The reviewed price/quantity/comment are held for 35 minutes. Confirmation atomically credits the wallet and rechecks pending status, spending limits, shares and balance before approval. If the request was rejected, funds were spent, limits changed, or the quote expired, the deposit remains in the wallet and the UI explains why manual review is needed. No second charge is initiated automatically.
+
+Stripe's USD minimum is $0.50. When the exact missing amount is lower, checkout is blocked rather than silently charging more; top up at least $1 manually and approve again. Amounts are limited to $10,000. All amounts are stored in integer cents for payment validation. Multiple or out-of-order notifications are safe because the wallet deposit is unique by Stripe session and serialized with the parent/family transaction.
+
+Test card: `4242 4242 4242 4242`, any future expiry, any three-digit CVC. Decline test card: `4000 0000 0000 0002`.
+
+Run `npm test` for settlement, duplicate notification, ownership, altered amount/currency/mode, spending-limit, rejected-request and expired-quote checks. A successful build or unit test is not proof of a hosted Checkout payment: the browser-funded flow additionally requires working MongoDB credentials.

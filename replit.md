@@ -34,8 +34,8 @@ Family stock-learning web app with separate parent and kid portals. All investin
 - Demo visitors get isolated random-key families. Sample prices/charts and credits must be labeled demo. No real payment occurs.
 - Portfolio dashboard history is invested cost from transaction records, not historical market performance.
 
-## Pending production work
+## Stripe and production work
 
-Stripe is NOT connected. Non-demo checkout and webhook fail closed. Real-account funding, signed/idempotent webhooks, receipts and automatic insufficient-balance approval resumption require setup and implementation. Do not say payments or the complete funded flow work end to end.
+Stripe is test-only. Startup initializes managed sync in ancillary PostgreSQL and a managed webhook; app/family data remains MongoDB. A secure server test key is required because the generic connector does not expose native credentials. Demo credits and Stripe test funding are explicit separate modes. Only server-confirmed paid sessions credit wallets. Parent review instructions are atomically resumed after payment, with current limits and request status rechecked. No live-mode keys or events are accepted. The hosted checkout amount is the exact missing amount; Stripe's $0.50 USD minimum is handled explicitly.
 
-Before a public launch: finish Stripe test integration, shared rate limiting, JWT revocation, privacy/parental consent review, security/accessibility testing, provider terms review. Read the app README for current limitations.
+Before a public launch: shared rate limiting, JWT revocation, privacy/parental consent review, security/accessibility testing, provider terms review. Read the app README for current limitations.

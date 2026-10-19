@@ -16,13 +16,15 @@ function installedVersion(name) {
 await fs.mkdir(out, { recursive: true });
 await fs.rm(stage, { recursive: true, force: true });
 await fs.mkdir(stage, { recursive: true });
-for (const name of ["src", "public", "scripts", "middleware.ts", "next.config.mjs", "postcss.config.mjs", "next-env.d.ts", "README.md", ".env.example"]) {
+for (const name of ["src", "public", "scripts", "tests", "middleware.ts", "next.config.mjs", "postcss.config.mjs", "next-env.d.ts", "README.md", ".env.example"]) {
   try { await fs.cp(path.join(app, name), path.join(stage, name), { recursive: true }); }
   catch (e) { if (e.code !== "ENOENT") throw e; }
 }
 // Vite scaffold is not part of the downloadable Next application.
 for (const name of ["src/main.tsx", "src/App.tsx", "scripts/export.mjs"]) await fs.rm(path.join(stage, name), { force: true });
 const pkg = { ...sourcePackage, name: "kidvest", version: "1.0.0" };
+const rootPackage = JSON.parse(await fs.readFile(path.join(root, "package.json"), "utf8"));
+for (const name of ["stripe", "stripe-replit-sync"]) pkg.dependencies[name] = rootPackage.dependencies[name];
 delete pkg.scripts.export;
 for (const section of ["dependencies", "devDependencies"]) {
   const deps = pkg[section] || {};

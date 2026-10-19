@@ -14,6 +14,14 @@ export type StoredHolding = { id: string; parentId: string; kidId: string; symbo
 export type StoredRequest = StockRequest & { updatedAt: string };
 export type StoredTransaction = Transaction & { parentId: string; stripeSessionId?: string; symbol?: string; quantity?: number };
 export type StoredActivity = Activity & { parentId: string; actorId: string; kidId?: string };
+export type PaymentAttempt = {
+  id: string; parentId: string; kidId: string; amountCents: number;
+  stripeSessionId?: string; requestId?: string; quantity?: number;
+  approvalPrice?: number; source?: "live" | "demo"; parentComment?: string;
+  status: "creating" | "pending" | "completed" | "failed" | "expired";
+  approvalStatus: "none" | "approved" | "deferred"; message: string;
+  receiptUrl?: string; createdAt: string; expiresAt: string;
+};
 export type State = {
   users: StoredUser[];
   wallets: Wallet[];
@@ -21,8 +29,9 @@ export type State = {
   holdings: StoredHolding[];
   transactions: StoredTransaction[];
   activity: StoredActivity[];
+  paymentAttempts: PaymentAttempt[];
 };
-export const emptyState = (): State => ({ users: [], wallets: [], requests: [], holdings: [], transactions: [], activity: [] });
+export const emptyState = (): State => ({ users: [], wallets: [], requests: [], holdings: [], transactions: [], activity: [], paymentAttempts: [] });
 export const cents = (amount: number) => Math.round((amount + Number.EPSILON) * 100) / 100;
 export const now = () => new Date().toISOString();
 export function publicUser(user: StoredUser): User {

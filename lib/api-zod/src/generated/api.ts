@@ -331,7 +331,8 @@ export const reviewRequestBodyParentCommentMax = 500;
 export const ReviewRequestBody = zod.object({
   "action": zod.enum(['approve', 'reject', 'cancel']),
   "quantity": zod.number().gt(reviewRequestBodyQuantityExclusiveMin).max(reviewRequestBodyQuantityMax).optional(),
-  "parentComment": zod.string().max(reviewRequestBodyParentCommentMax).optional()
+  "parentComment": zod.string().max(reviewRequestBodyParentCommentMax).optional(),
+  "fundWithStripe": zod.boolean().optional()
 })
 
 export const ReviewRequestResponse = zod.object({
@@ -373,7 +374,8 @@ export const GetPortfolioResponse = zod.object({
   "status": zod.string(),
   "createdAt": zod.string(),
   "isDemo": zod.boolean(),
-  "receiptUrl": zod.string().optional()
+  "receiptUrl": zod.string().optional(),
+  "paymentProvider": zod.enum(['demo', 'stripe_test']).optional()
 }))
 })
 
@@ -397,7 +399,8 @@ export const GetPaymentsResponseItem = zod.object({
   "status": zod.string(),
   "createdAt": zod.string(),
   "isDemo": zod.boolean(),
-  "receiptUrl": zod.string().optional()
+  "receiptUrl": zod.string().optional(),
+  "paymentProvider": zod.enum(['demo', 'stripe_test']).optional()
 })
 export const GetPaymentsResponse = zod.array(GetPaymentsResponseItem)
 
@@ -408,7 +411,8 @@ export const fundWalletBodyAmountMax = 10000;
 
 export const FundWalletBody = zod.object({
   "kidId": zod.string(),
-  "amount": zod.number().min(1).max(fundWalletBodyAmountMax)
+  "amount": zod.number().min(1).max(fundWalletBodyAmountMax),
+  "useStripe": zod.boolean().optional()
 })
 
 export const FundWalletResponse = zod.object({
@@ -462,6 +466,31 @@ export const UpdateSettingsResponse = zod.object({
   "isDemo": zod.boolean(),
   "notifications": zod.boolean(),
   "completedLessons": zod.array(zod.string())
+})
+
+
+export const confirmPaymentBodySessionIdMin = 10;
+export const confirmPaymentBodySessionIdMax = 255;
+
+
+
+export const ConfirmPaymentBody = zod.object({
+  "sessionId": zod.string().min(confirmPaymentBodySessionIdMin).max(confirmPaymentBodySessionIdMax),
+  "cancelled": zod.boolean().optional()
+})
+
+export const ConfirmPaymentResponse = zod.object({
+  "status": zod.enum(['pending', 'completed', 'failed', 'expired']),
+  "approvalStatus": zod.enum(['none', 'approved', 'deferred']),
+  "message": zod.string(),
+  "amount": zod.number(),
+  "receiptUrl": zod.string().optional()
+})
+
+
+export const GetPaymentSetupResponse = zod.object({
+  "enabled": zod.boolean(),
+  "mode": zod.enum(['test', 'unavailable'])
 })
 
 

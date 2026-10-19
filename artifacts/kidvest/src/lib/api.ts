@@ -6,7 +6,7 @@ import { z } from "zod";
 import {
   RegisterParentBody, CreateKidBody, UpdateKidBody, CreateRequestBody,
   ReviewRequestBody, FundWalletBody, UpdateSettingsBody, CompleteLessonBody,
-  GetStockChartQueryParams, GetStockQuoteQueryParams, SearchStocksQueryParams,
+  GetStockChartQueryParams, GetStockQuoteQueryParams, SearchStocksQueryParams, ConfirmPaymentBody,
 } from "@workspace/api-zod";
 import { authOptions, rateLimit } from "./auth";
 import { findUser, mutateState, readState, storageMode } from "./store";
@@ -15,6 +15,9 @@ import { createDemoFamily, logActivity } from "./seed";
 import { chart, quote, search, popular } from "./market";
 import { kidView, portfolio, ledgerChart } from "./portfolio";
 import { lessonCatalog } from "./lessons";
+import { approveTrade } from "./trading";
+import { ownedPayment, startCheckout } from "./payments";
+import { ensureStripeReady, stripeConfigured } from "./stripe-setup";
 
 const quantitySchema = z.number().finite().positive().max(100000).refine(n => Math.abs(n * 1e6 - Math.round(n * 1e6)) < 0.00001, "Use at most 6 decimal places.");
 const usernameSchema = z.string().trim().toLowerCase().regex(/^[a-z0-9_-]{3,30}$/, "Usernames use 3–30 letters, numbers, hyphens or underscores.");
@@ -173,6 +176,7 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
       if (method === "DELETE") {
         await mutateState(pid, s => {
           const kid = ownKid(s, user, id);
+          if (s.paymentAttempts.some(a => a.kidId === id && ["creating", "pending", "failed"].includes(a.status) && Date.parse(a.expiresAt) > Date.now())) throw new HttpError(409, "This child has an open Stripe checkout. Complete it or wait for it to expire before deleting the account.");
           s.users = s.users.filter(k => k.id !== id);
           s.wallets = s.wallets.filter(w => w.kidId !== id);
           s.holdings = s.holdings.filter(h => h.kidId !== id);
@@ -229,41 +233,19 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
         } else if (data.action === "reject") {
           r.status = "rejected";
         } else {
-          const quantity = data.quantity ?? r.quantity;
-          const total = cents(quantity * q!.price);
-          if (total < 0.01) throw new HttpError(400, "The request must be worth at least $0.01.");
-          const wallet = s.wallets.find(w => w.kidId === r.kidId)!;
-          let holding = s.holdings.find(h => h.kidId === r.kidId && h.symbol === r.symbol);
-          if (r.type === "buy") {
-            const approvedBuys = s.requests.filter(x => x.kidId === kid.id && x.status === "approved" && x.type === "buy");
-            const day = now().slice(0, 10), month = now().slice(0, 7);
-            const spent = (prefix: string) => cents(approvedBuys.filter(x => x.updatedAt.startsWith(prefix)).reduce((a, x) => a + x.totalCost, 0));
-            if (spent(day) + total > kid.dailyLimit + 1e-8) throw new HttpError(400, `This exceeds ${kid.name}'s daily spending limit.`);
-            if (spent(month) + total > kid.monthlyLimit + 1e-8) throw new HttpError(400, `This exceeds ${kid.name}'s monthly spending limit.`);
-            if (wallet.balance < total) return { success: false, missingAmount: cents(total - wallet.balance), message: kid.isDemo ? `Add $${cents(total - wallet.balance).toFixed(2)} in demo credits to ${kid.name}'s wallet, then approve again.` : `The wallet needs $${cents(total - wallet.balance).toFixed(2)} more. Stripe test payments must be connected before topping up.` };
-            wallet.balance = cents(wallet.balance - total);
-            if (holding) {
-              holding.avgBuyPrice = (holding.quantity * holding.avgBuyPrice + quantity * q!.price) / (holding.quantity + quantity);
-              holding.quantity = +(holding.quantity + quantity).toFixed(6);
-            } else s.holdings.push({ id: randomUUID(), kidId: kid.id, parentId: pid, symbol: r.symbol, companyName: r.companyName, quantity, avgBuyPrice: q!.price });
-          } else {
-            if (!holding || holding.quantity + 1e-8 < quantity) throw new HttpError(400, "Not enough shares remain for this sale.");
-            holding.quantity = +(holding.quantity - quantity).toFixed(6);
-            if (holding.quantity <= 0) s.holdings = s.holdings.filter(h => h.id !== holding!.id);
-            wallet.balance = cents(wallet.balance + total);
-          }
-          r.quantity = quantity;
-          r.priceAtApproval = q!.price;
-          r.totalCost = total;
-          r.source = q!.source;
-          r.status = "approved";
-          s.transactions.unshift({ id: randomUUID(), parentId: pid, kidId: kid.id, kidName: kid.name, amount: total, type: r.type === "buy" ? "purchase" : "sale", status: "completed", createdAt: now(), isDemo: user.isDemo, symbol: r.symbol, quantity });
+          return approveTrade(s, user, r, data.quantity ?? r.quantity, q!, data.parentComment?.trim());
         }
         r.parentComment = data.parentComment?.trim() || "";
         r.updatedAt = now();
         logActivity(s, user, r.status, `${user.name} ${r.status} ${kid.name}'s ${r.type} request for ${r.symbol}.`, kid.id);
         return { success: true, message: `Request ${r.status}.` };
       });
+      if (!result.success && result.missingAmount && data.action === "approve" && (!user.isDemo || data.fundWithStripe)) {
+        rateLimit(`checkout:${user.id}`, 20, 60000);
+        return json(await startCheckout(user, existing.kidId, result.missingAmount, new URL(req.headers.get("origin")!).origin, {
+          requestId: id, quantity: data.quantity ?? existing.quantity, price: q!.price, source: q!.source, comment: data.parentComment?.trim() || "",
+        }));
+      }
       return json(result);
     }
     if (route === "kv/portfolio" && method === "GET") {
@@ -285,8 +267,8 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
       if (method === "POST") {
         const data = FundWalletBody.parse(await body(req));
         rateLimit(`fund:${user.id}`, 30, 60000);
-        if (!user.isDemo) throw new HttpError(503, "Stripe is not connected yet. No payment has been taken and no funds have been added. Connect Stripe test mode to enable checkout.");
         if (cents(data.amount) !== data.amount) throw new HttpError(400, "Use dollars and cents only.");
+        if (!user.isDemo || data.useStripe) return json(await startCheckout(user, data.kidId, data.amount, new URL(req.headers.get("origin")!).origin));
         await mutateState(pid, s => {
           const kid = ownKid(s, user, data.kidId);
           const wallet = s.wallets.find(w => w.kidId === kid.id)!;
@@ -296,6 +278,21 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
         });
         return json({ success: true, message: "Demo credits added. No real payment was taken." });
       }
+    }
+    if (route === "kv/payments/confirm" && method === "POST") {
+      requireRole(user, "parent");
+      rateLimit(`confirm:${user.id}`, 60, 60000);
+      const data = ConfirmPaymentBody.parse(await body(req));
+      if (!/^cs_test_[A-Za-z0-9_]+$/.test(data.sessionId)) throw new HttpError(400, "A valid Stripe test checkout session is required.");
+      return json(await ownedPayment(pid, data.sessionId, data.cancelled));
+    }
+    if (route === "kv/payment-status" && method === "GET") {
+      requireRole(user, "parent");
+      try {
+        if (!stripeConfigured()) return json({ enabled: false, mode: "unavailable" });
+        await ensureStripeReady();
+        return json({ enabled: true, mode: "test" });
+      } catch { return json({ enabled: false, mode: "unavailable" }); }
     }
     if (route === "kv/lessons" && method === "GET") {
       requireRole(user, "kid");
@@ -329,7 +326,7 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
         requests: requests.slice(0, 6), activity, chart: ledgerChart(s, ids),
         completedLessonCount: kids.reduce((a, k) => a + k.completedLessons.length, 0),
         xp: lessonCatalog.filter(l => user.completedLessons.includes(l.id)).reduce((a, l) => a + l.xp, 0),
-        marketSource: user.isDemo ? "demo" : "live", storageMode: storageMode(), stripeEnabled: false,
+        marketSource: user.isDemo ? "demo" : "live", storageMode: storageMode(), stripeEnabled: stripeConfigured(),
       });
     }
     throw new HttpError(404, "Endpoint not found.");

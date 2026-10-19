@@ -10,6 +10,7 @@
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "seed": "tsx scripts/seed.ts",
+    "test": "tsx --test tests/*.test.ts",
     "export": "node scripts/export.mjs"
   },
   "devDependencies": {

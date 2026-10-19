@@ -22,7 +22,7 @@ async function connect() {
 }
 async function localRead(): Promise<State> {
   if (process.env.NODE_ENV === "production") throw new HttpError(503, "Configure MongoDB before publishing. Local demo storage is development-only.");
-  try { return JSON.parse(await fs.readFile(filename, "utf8")); }
+  try { return { ...emptyState(), ...JSON.parse(await fs.readFile(filename, "utf8")) }; }
   catch (e) { if ((e as NodeJS.ErrnoException).code === "ENOENT") return emptyState(); throw e; }
 }
 async function localWrite(s: State) {
@@ -57,6 +57,7 @@ export async function readState(parentId?: string): Promise<State> {
       holdings: s.holdings.filter(x => x.parentId === parentId),
       transactions: s.transactions.filter(x => x.parentId === parentId),
       activity: s.activity.filter(x => x.parentId === parentId),
+      paymentAttempts: s.paymentAttempts.filter(x => x.parentId === parentId),
     };
   }
   await connect();

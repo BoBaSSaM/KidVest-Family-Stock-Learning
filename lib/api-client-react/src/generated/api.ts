@@ -22,6 +22,7 @@ import type {
   Activity,
   Dashboard,
   FundingInput,
+  GetPaymentSetup200,
   GetPortfolioParams,
   GetStockChartParams,
   GetStockQuoteParams,
@@ -32,6 +33,8 @@ import type {
   Lesson,
   LessonAnswer,
   LessonResult,
+  PaymentConfirmation,
+  PaymentStatus,
   Portfolio,
   RegistrationInput,
   RequestInput,
@@ -1361,6 +1364,159 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getUpdateSettingsMutationOptions(options));
     }
+
+export const getConfirmPaymentUrl = () => {
+
+
+
+
+  return `/api/kv/payments/confirm`
+}
+
+export const confirmPayment = async (paymentConfirmation: PaymentConfirmation, options?: Parameters<typeof customFetch>[1]): Promise<PaymentStatus> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<PaymentStatus>(getConfirmPaymentUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(paymentConfirmation)
+  }
+);}
+
+
+
+
+
+export const getConfirmPaymentMutationKey = () => ['confirmPayment'] as const;
+
+export const getConfirmPaymentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmPayment>>, TError,ConfirmPaymentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof confirmPayment>>, TError,ConfirmPaymentMutationVariables, TContext> => {
+
+const mutationKey = getConfirmPaymentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof confirmPayment>>, ConfirmPaymentMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  confirmPayment(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConfirmPaymentMutationResult = NonNullable<Awaited<ReturnType<typeof confirmPayment>>>
+    export type ConfirmPaymentMutationBody = BodyType<PaymentConfirmation>
+    export type ConfirmPaymentMutationError = ErrorType<unknown>
+    export type ConfirmPaymentMutationVariables = {data: BodyType<PaymentConfirmation>}
+
+    export const useConfirmPayment = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmPayment>>, TError,ConfirmPaymentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof confirmPayment>>,
+        TError,
+        ConfirmPaymentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getConfirmPaymentMutationOptions(options));
+    }
+
+export const getGetPaymentSetupUrl = () => {
+
+
+
+
+  return `/api/kv/payment-status`
+}
+
+export const getPaymentSetup = async ( options?: Parameters<typeof customFetch>[1]): Promise<GetPaymentSetup200> => {
+
+  return customFetch<GetPaymentSetup200>(getGetPaymentSetupUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPaymentSetupQueryKey = () => {
+    return [
+    `/api/kv/payment-status`
+    ] as const;
+    }
+
+
+export const getGetPaymentSetupQueryOptions = <TData = Awaited<ReturnType<typeof getPaymentSetup>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPaymentSetup>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPaymentSetupQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPaymentSetup>>> = ({ signal }) => getPaymentSetup({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPaymentSetup>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPaymentSetupQueryResult = NonNullable<Awaited<ReturnType<typeof getPaymentSetup>>>
+export type GetPaymentSetupQueryError = ErrorType<unknown>
+
+
+
+export function useGetPaymentSetup<TData = Awaited<ReturnType<typeof getPaymentSetup>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPaymentSetup>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPaymentSetupQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetLessonsUrl = () => {
 
