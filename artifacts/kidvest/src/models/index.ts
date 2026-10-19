@@ -10,7 +10,8 @@ const userSchema = new Schema({
   parentId: { type: String, index: true }, age: Number, avatar: String,
   isDemo: Boolean, demoKey: { type: String, index: true }, notifications: Boolean,
   dailyLimit: Number, monthlyLimit: Number, completedLessons: [String],
-  revision: { type: Number, default: 0 }, createdAt: String,
+  revision: { type: Number, default: 0 },
+  authVersion: { type: Number, default: 0, min: 0 }, createdAt: String,
 }, { versionKey: false });
 const walletSchema = new Schema({ ...base, parentId: { type: String, index: true }, kidId: { type: String, unique: true }, balance: Number, currency: String }, { versionKey: false });
 const requestSchema = new Schema({

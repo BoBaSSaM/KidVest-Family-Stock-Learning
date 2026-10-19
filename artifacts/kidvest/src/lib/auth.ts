@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { findUser, findDemoUser } from "./store";
 import { HttpError } from "./domain";
+import { authVersion, requireCurrentSession } from "./session-version";
 
 type Limiter = Map<string, { count: number; reset: number }>;
 const root = globalThis as typeof globalThis & { kidvestLimiter?: Limiter; kidvestSecret?: string };
@@ -46,24 +47,30 @@ export const authOptions: NextAuthOptions = {
           const parsed = z.object({ demoKey: z.string().regex(/^[a-f0-9]{64}$/), role: z.enum(["parent", "kid"]) }).safeParse(raw);
           if (!parsed.success) return null;
           const user = await findDemoUser(parsed.data.demoKey, parsed.data.role);
-          return user ? { id: user.id, name: user.name, role: user.role, avatar: user.avatar, isDemo: true } : null;
+          return user ? { id: user.id, name: user.name, role: user.role, avatar: user.avatar, isDemo: true, authVersion: authVersion(user) } : null;
         }
         const parsed = z.object({ identifier: z.string().trim().min(3).max(254), password: z.string().min(1).max(72), role: z.enum(["parent", "kid"]) }).safeParse(raw);
         if (!parsed.success) return null;
         rateLimit(`account:${parsed.data.identifier.toLowerCase()}`, 10);
         const user = await findUser(parsed.data.identifier.toLowerCase());
         if (!user || user.role !== parsed.data.role || !await compare(parsed.data.password, user.passwordHash)) return null;
-        return { id: user.id, name: user.name, role: user.role, avatar: user.avatar, isDemo: user.isDemo };
+        return { id: user.id, name: user.name, role: user.role, avatar: user.avatar, isDemo: user.isDemo, authVersion: authVersion(user) };
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
-      if (user) { token.id = user.id; token.role = user.role; token.avatar = user.avatar; token.isDemo = user.isDemo; }
+      if (user) {
+        token.id = user.id; token.role = user.role; token.avatar = user.avatar; token.isDemo = user.isDemo; token.authVersion = user.authVersion;
+      } else {
+        // NextAuth clears the session cookie when this callback rejects. Never
+        // refresh a revoked token, including on client-triggered session updates.
+        requireCurrentSession(token, token.id ? await findUser(token.id) : undefined);
+      }
       return token;
     },
     async session({ session, token }) {
-      session.user = { ...session.user, id: token.id as string, role: token.role as "parent" | "kid", avatar: token.avatar as string, isDemo: token.isDemo as boolean };
+      session.user = { ...session.user, id: token.id as string, role: token.role as "parent" | "kid", avatar: token.avatar as string, isDemo: token.isDemo as boolean, authVersion: token.authVersion };
       return session;
     },
   },

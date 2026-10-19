@@ -14,7 +14,7 @@ async function main() {
   const password = `Kv-${randomBytes(9).toString("base64url")}`;
   const passwordHash = await hash(password, 12);
   const id = randomUUID();
-  const parent: StoredUser = { id, name: "Demo Parent", email, identifier: email, passwordHash, role: "parent", avatar: "parent", isDemo: true, completedLessons: [], notifications: true, dailyLimit: 0, monthlyLimit: 0, revision: 0, createdAt: now() };
+  const parent: StoredUser = { id, name: "Demo Parent", email, identifier: email, passwordHash, role: "parent", avatar: "parent", isDemo: true, completedLessons: [], notifications: true, dailyLimit: 0, monthlyLimit: 0, revision: 0, authVersion: 0, createdAt: now() };
   await mutateState(id, state => {
     state.users.push(parent);
     for (const [i, name] of ["Oliver", "Sophie"].entries()) {

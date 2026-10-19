@@ -97,7 +97,9 @@ If MongoDB is absent in development, a **development-only** local JSON learning 
 
 ## Before a public launch
 
-Complete shared rate limiting, immediate JWT revocation, privacy/parental-consent review, child safety review, legal/provider terms review, accessibility testing and production security review. This build is not a certification of production readiness.
+Complete shared rate limiting, privacy/parental-consent review, child safety review, legal/provider terms review, accessibility testing and production security review. This build is not a certification of production readiness.
+
+Password changes revoke all existing sessions for that account, including the session changing a parent's password. Parent-driven kid resets revoke only that child's sessions. Passwords and per-user authentication versions are saved in the same family transaction, independently of the financial family revision. Protected APIs and session refreshes check persisted versions without a revocation cache; deleted accounts and old tokens without a version must sign in again. On the first rollout, all pre-versioning sessions require a fresh login, while existing accounts need no data migration. Normal sign-out clears only the current browser cookie, not other devices' sessions. Middleware redirects are routing hints; database-backed API/session checks enforce access. Demo login keys for an account are removed on password change/reset.
 
 Do not process real money or treat this as financial advice. Use Stripe test cards only.
 

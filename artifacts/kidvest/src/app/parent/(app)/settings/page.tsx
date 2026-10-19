@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { signOut } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Bell, KeyRound, Save, UserRound } from "lucide-react";
@@ -63,7 +64,7 @@ export default function SettingsPage() {
             <Field label={tr("Current password", "كلمة المرور الحالية")} htmlFor="s-cur"><input id="s-cur" type="password" autoComplete="current-password" className="toy-input" value={current} onChange={(e) => setCurrent(e.target.value)} data-testid="input-current-password" /></Field>
             <Field label={tr("New password", "كلمة المرور الجديدة")} htmlFor="s-new" hint={tr("At least 8 characters.", "٨ أحرف على الأقل.")}><input id="s-new" type="password" autoComplete="new-password" className="toy-input" value={next} onChange={(e) => setNext(e.target.value)} data-testid="input-new-password" /></Field>
           </div>
-          <ToyButton className="self-start" variant="outline" disabled={update.isPending || !current || next.length < 8} onClick={() => save({ currentPassword: current, newPassword: next }, tr("Password changed", "تغيّرت كلمة المرور"), () => { setCurrent(""); setNext(""); })} data-testid="button-change-password">
+          <ToyButton className="self-start" variant="outline" disabled={update.isPending || !current || next.length < 8} onClick={() => save({ currentPassword: current, newPassword: next }, tr("Password changed. Please sign in again.", "تغيّرت كلمة المرور. يرجى تسجيل الدخول مرة أخرى."), () => { setCurrent(""); setNext(""); void signOut({ callbackUrl: "/parent/login" }); })} data-testid="button-change-password">
             {tr("Update password", "حدّث كلمة المرور")}
           </ToyButton>
         </Panel>

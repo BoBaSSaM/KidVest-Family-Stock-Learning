@@ -4,7 +4,7 @@ import { mutateState } from "./store";
 import { now, type StoredUser, type State } from "./domain";
 
 function account(data: Partial<StoredUser> & Pick<StoredUser, "id" | "name" | "identifier" | "role" | "passwordHash">): StoredUser {
-  return { avatar: "fox", isDemo: true, notifications: true, completedLessons: [], dailyLimit: 1000, monthlyLimit: 5000, revision: 0, createdAt: now(), ...data };
+  return { avatar: "fox", isDemo: true, notifications: true, completedLessons: [], dailyLimit: 1000, monthlyLimit: 5000, revision: 0, authVersion: 0, createdAt: now(), ...data };
 }
 export async function createDemoFamily() {
   const parentId = randomUUID();

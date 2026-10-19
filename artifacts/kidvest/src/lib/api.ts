@@ -9,6 +9,7 @@ import {
   GetStockChartQueryParams, GetStockQuoteQueryParams, SearchStocksQueryParams, ConfirmPaymentBody,
 } from "@workspace/api-zod";
 import { authOptions, rateLimit } from "./auth";
+import { authVersion, replacePassword, requireCurrentSession } from "./session-version";
 import { findUser, mutateState, readState, storageMode } from "./store";
 import { HttpError, cents, now, publicUser, type State, type StoredUser } from "./domain";
 import { createDemoFamily, logActivity } from "./seed";
@@ -28,10 +29,8 @@ function requireRole(u: StoredUser, role: "parent" | "kid") {
 async function currentUser() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) throw new HttpError(401, "Please sign in to continue.");
-  const user = await findUser(session.user.id);
-  if (!user) throw new HttpError(401, "This account no longer exists.");
-  if (user.role !== session.user.role) throw new HttpError(403, "Access denied.");
-  return user;
+  const user = requireCurrentSession(session.user, await findUser(session.user.id));
+  return { ...user, authVersion: authVersion(user) };
 }
 function ownKid(s: State, user: StoredUser, id: string) {
   const kid = s.users.find(k => k.id === id && k.role === "kid" && k.parentId === parentId(user));
@@ -74,7 +73,7 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
       const email = data.email.trim().toLowerCase();
       if (await findUser(email)) throw new HttpError(409, "An account already uses this email.");
       const id = randomUUID();
-      const user: StoredUser = { id, name: data.name.trim(), email, identifier: email, passwordHash: await hash(data.password, 12), role: "parent", avatar: "parent", isDemo: storageMode() === "local-demo", completedLessons: [], notifications: true, dailyLimit: 0, monthlyLimit: 0, createdAt: now(), revision: 0 };
+      const user: StoredUser = { id, name: data.name.trim(), email, identifier: email, passwordHash: await hash(data.password, 12), role: "parent", avatar: "parent", isDemo: storageMode() === "local-demo", completedLessons: [], notifications: true, dailyLimit: 0, monthlyLimit: 0, createdAt: now(), revision: 0, authVersion: 0 };
       if (user.name.length < 2) throw new HttpError(400, "Please enter your name.");
       await mutateState(id, s => {
         if (s.users.some(u => u.identifier === email)) throw new HttpError(409, "An account already uses this email.");
@@ -108,14 +107,16 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
         }
         const passwordHash = data.newPassword ? await hash(data.newPassword, 12) : undefined;
         const updated = await mutateState(pid, s => {
-          const u = s.users.find(x => x.id === user.id)!;
+          // Recheck inside the transaction: a concurrent password change must
+          // not allow an already-authenticated request to overwrite credentials.
+          const u = requireCurrentSession(user, s.users.find(x => x.id === user.id));
           if (data.name !== undefined) {
             if (data.name.trim().length < 2) throw new HttpError(400, "Please enter your name.");
             u.name = data.name.trim();
           }
           if (data.email) { u.email = data.email.trim().toLowerCase(); u.identifier = u.email; }
           if (data.notifications !== undefined) u.notifications = data.notifications;
-          if (passwordHash) u.passwordHash = passwordHash;
+          if (passwordHash) replacePassword(u, passwordHash);
           logActivity(s, u, "settings", "Updated account settings.");
           return publicUser(u);
         });
@@ -134,7 +135,7 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
         const name = data.name.trim();
         if (name.length < 2) throw new HttpError(400, "Please enter your child's name.");
         if (await findUser(username)) throw new HttpError(409, "This username is already taken.");
-        const kid: StoredUser = { ...data, id: randomUUID(), name, username, identifier: username, passwordHash: await hash(data.password, 12), role: "kid", parentId: pid, isDemo: user.isDemo, notifications: true, completedLessons: [], revision: 0, createdAt: now() };
+        const kid: StoredUser = { ...data, id: randomUUID(), name, username, identifier: username, passwordHash: await hash(data.password, 12), role: "kid", parentId: pid, isDemo: user.isDemo, notifications: true, completedLessons: [], revision: 0, authVersion: 0, createdAt: now() };
         // Never persist plaintext passwords from the parsed input.
         delete (kid as StoredUser & { password?: string }).password;
         const safe = await mutateState(pid, s => {
@@ -159,6 +160,7 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
         }
         const passwordHash = data.password ? await hash(data.password, 12) : undefined;
         return json(await mutateState(pid, s => {
+          requireCurrentSession(user, s.users.find(x => x.id === user.id));
           const kid = ownKid(s, user, id);
           for (const key of ["name", "avatar", "age", "dailyLimit", "monthlyLimit"] as const) {
             const v = data[key];
@@ -166,7 +168,7 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
           }
           if (kid.name.length < 2) throw new HttpError(400, "Please enter your child's name.");
           if (data.username) { kid.username = data.username; kid.identifier = data.username; }
-          if (passwordHash) kid.passwordHash = passwordHash;
+          if (passwordHash) replacePassword(kid, passwordHash);
           // Keep historical request labels stable; use current name for pending reviews.
           s.requests.filter(r => r.kidId === id && r.status === "pending").forEach(r => { r.kidName = kid.name; r.kidAvatar = kid.avatar; });
           logActivity(s, user, "kid_updated", `Updated ${kid.name}'s profile or limits.`, kid.id);
