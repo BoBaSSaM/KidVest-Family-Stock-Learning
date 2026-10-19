@@ -1,1 +1,2 @@
 - [Framework security constraint](framework-security.md) — preserve the supported Next.js upgrade rather than restoring the original blocked version.
+- [Stripe connection boundary](stripe-connection.md) — the generic API connector does not supply the native server credentials required by managed sync.
