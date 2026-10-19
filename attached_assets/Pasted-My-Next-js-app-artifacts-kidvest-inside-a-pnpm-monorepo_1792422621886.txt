@@ -1,0 +1,44 @@
+My Next.js app (artifacts/kidvest, inside a pnpm monorepo) builds successfully on Vercel (compile, TypeScript, and all 18 pages generate), but the deploy step fails with:
+
+"The framework produced an invalid deployment package for a Serverless Function. Typically this means that the framework produces files in symlinked directories."
+
+The failing commit is 0be75ca. Please fix this so it deploys on Vercel. Do NOT change app features, UI, or business logic. Work through these steps in order:
+
+STEP 1 - Find committed symlinks
+Run: git ls-files -s | grep ^120000
+List every file shown. For each one, tell me what it points to. If it is not needed by the app, remove it with `git rm --cached <path>` and add it to .gitignore. Also check that no symlinks exist inside artifacts/kidvest (run: find artifacts/kidvest -type l -not -path "*/node_modules/*").
+
+STEP 2 - Fix pnpm layout
+Create or update a file named .npmrc at the monorepo ROOT with exactly:
+node-linker=hoisted
+Then delete node_modules and regenerate pnpm-lock.yaml by running `pnpm install` from the root. Make sure the preinstall script that deletes package-lock.json / yarn.lock still works.
+
+STEP 3 - Update artifacts/kidvest/next.config.mjs
+- Import path and url, and define __dirname with fileURLToPath(import.meta.url).
+- Set outputFileTracingRoot: path.join(__dirname, '../..')
+- Add transpilePackages: ['@workspace/api-zod', '@workspace/api-client-react']
+- Add serverExternalPackages: ['mongoose', 'bcryptjs', 'yahoo-finance2']
+- Do NOT use output: 'standalone' (it creates symlinks that break Vercel).
+- Keep all existing config that is already there.
+
+STEP 4 - Clean up dependencies in artifacts/kidvest/package.json
+- Make sure everything used at runtime by server routes is under "dependencies": next, next-auth, mongoose, bcryptjs, yahoo-finance2, @workspace/api-zod, react, react-dom, zod.
+- Move @workspace/api-client-react to "dependencies" if it is imported by app code.
+- Remove tsx and @next/env from dependencies if nothing in the app imports them at runtime.
+- Remove leftover Vite/Replit-only packages that a Next.js app does not use: @replit/vite-plugin-cartographer, @replit/vite-plugin-dev-banner, @replit/vite-plugin-runtime-error-modal, @tailwindcss/vite, @vitejs/plugin-react, vite, wouter. First search the code to confirm none of them are imported, and tell me if any are.
+- Make sure the build script is: "build": "next build --webpack"
+
+STEP 5 - Add artifacts/kidvest/vercel.json
+{
+  "framework": "nextjs",
+  "installCommand": "cd ../.. && pnpm install",
+  "buildCommand": "next build --webpack"
+}
+
+STEP 6 - Verify locally
+From the root run: pnpm install, then pnpm --filter @workspace/kidvest build
+After the build, run: find artifacts/kidvest/.next -type l
+and tell me if any symlinks are produced. Fix them if so.
+
+STEP 7 - Commit
+Commit all changes with the message "Fix Vercel symlink deployment error" and make sure pnpm-lock.yaml and .npmrc are included. Then show me the new commit hash and the exact list of files you changed, added, or deleted. Tell me clearly if you cannot push to GitHub, so I can push from the Git tab myself.
