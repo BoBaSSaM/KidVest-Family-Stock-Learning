@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { randomUUID } from "node:crypto";
 import { getStripeSync, getUncachableStripeClient } from "./stripe-client";
-import { ensureStripeReady } from "./stripe-setup";
+import { ensureStripeReady, isVercelRuntime } from "./stripe-setup";
 import { mutateState, readState } from "./store";
 import { cents, HttpError, now, type PaymentAttempt, type StoredUser, type State } from "./domain";
 import { approveTrade } from "./trading";
@@ -111,6 +111,9 @@ export function settleAttempt(s: State, attemptId: string, session: Pick<Stripe.
   }
   return paymentView(a);
 }
+export function verifyStripeWebhookPayload(stripe: Stripe, payload: Buffer, signature: string, secret: string): Stripe.Event {
+  return stripe.webhooks.constructEvent(payload, signature, secret);
+}
 function paymentView(a: PaymentAttempt): PaymentStatus {
   return { status: a.status === "creating" ? "pending" : a.status, approvalStatus: a.approvalStatus, message: a.message, amount: a.amountCents / 100, receiptUrl: a.receiptUrl };
 }
@@ -138,11 +141,19 @@ export async function reconcileSession(sessionId: string, authenticatedParentId?
 export class WebhookHandlers {
   static async processWebhook(payload: Buffer, signature: string) {
     await ensureStripeReady();
-    const sync = await getStripeSync();
-    try { await sync.processWebhook(payload, signature); }
-    finally { await sync.postgresClient.pool.end(); }
-    // Parsing occurs only after managed sync has verified the Stripe signature.
-    const event = JSON.parse(payload.toString("utf8")) as Stripe.Event;
+    let event: Stripe.Event;
+    if (isVercelRuntime()) {
+      const secret = process.env.STRIPE_WEBHOOK_SECRET;
+      if (!secret) throw new Error("Stripe webhook signing secret is not configured.");
+      const stripe = await getUncachableStripeClient();
+      event = verifyStripeWebhookPayload(stripe, payload, signature, secret);
+    } else {
+      const sync = await getStripeSync();
+      try { await sync.processWebhook(payload, signature); }
+      finally { await sync.postgresClient.pool.end(); }
+      // Parsing occurs only after managed sync has verified the Stripe signature.
+      event = JSON.parse(payload.toString("utf8")) as Stripe.Event;
+    }
     if (event.livemode) throw new HttpError(400, "Live events are disabled.");
     if (["checkout.session.completed", "checkout.session.async_payment_succeeded", "checkout.session.expired"].includes(event.type)) {
       const session = event.data.object as Stripe.Checkout.Session;
