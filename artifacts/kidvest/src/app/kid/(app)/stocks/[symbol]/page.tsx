@@ -79,7 +79,7 @@ export default function StockPage() {
           <Panel className="flex flex-col gap-4 border-secondary/60">
             <h2 className="font-display text-xl font-extrabold">{tr("Like this company?", "أعجبتك هذه الشركة؟")}</h2>
             <p className="text-sm font-semibold text-muted-foreground">{tr("Send a request. Your parent checks the latest price and decides with you.", "أرسل طلبًا. سيتحقق والداك من آخر سعر ويقرران معك.")}</p>
-            {nonUsd && <p className="rounded-2xl bg-accent/20 p-3 text-xs font-bold">{tr(`This ticker trades in ${s.currency}. العب و اكسب wallets are USD only, so requests may be refused (no currency conversion).`, `يُتداول هذا الرمز بعملة ${s.currency}. محافظ «العب و اكسب» بالدولار فقط، لذا قد تُرفض الطلبات (لا تحويل عملات).`)}</p>}
+            {nonUsd && <p className="rounded-2xl bg-accent/20 p-3 text-xs font-bold">{tr(`This ticker trades in ${s.currency}. Ghiras wallets are USD only, so requests may be refused (no currency conversion).`, `يُتداول هذا الرمز بعملة ${s.currency}. محافظ «غراس» بالدولار فقط، لذا قد تُرفض الطلبات (لا تحويل عملات).`)}</p>}
             <ToyButton size="lg" variant="secondary" onClick={() => setTarget({ symbol: s.symbol, companyName: s.name, price: s.price, source: s.source, type: "buy" })} data-testid="button-request-buy">
               <ArrowUpRight className="h-5 w-5" />{tr("Ask to invest", "اطلب الاستثمار")}
             </ToyButton>

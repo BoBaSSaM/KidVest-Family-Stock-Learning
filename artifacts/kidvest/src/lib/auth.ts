@@ -33,7 +33,7 @@ export const authOptions: NextAuthOptions = {
   pages: { signIn: "/parent/login" },
   providers: [
     Credentials({
-      name: "KidVest",
+      name: "غراس",
       credentials: {
         identifier: { label: "Email or username", type: "text" },
         password: { label: "Password", type: "password" },

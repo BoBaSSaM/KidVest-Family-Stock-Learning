@@ -180,14 +180,11 @@ export function Logo({ className }: { className?: string }) {
   return (
     <span className={cn("inline-flex items-center gap-2", className)}>
       <span className="relative grid h-10 w-10 rotate-[-8deg] place-items-center rounded-2xl bg-primary text-primary-foreground shadow-[0_4px_0_hsl(var(--primary-deep))]">
-        <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <path d="M4 17l5-5 4 3 7-8" />
-          <path d="M15 7h5v5" />
-        </svg>
+        <Sprout className="h-6 w-6" aria-hidden />
         <span className="absolute -end-1 -top-1 h-3.5 w-3.5 rounded-full border-2 border-card bg-accent" />
       </span>
       <span dir="rtl" className="font-display whitespace-nowrap text-2xl font-extrabold">
-        العب و <span className="text-primary">اكسب</span>
+        <span className="text-primary">غراس</span>
       </span>
     </span>
   );
@@ -232,8 +229,8 @@ export function Disclaimer({ className }: { className?: string }) {
   return (
     <p className={cn("text-xs font-bold text-muted-foreground", className)}>
       {tr(
-        "Educational use only. Not financial advice. العب و اكسب is not a brokerage; investments are virtual and returns are never guaranteed.",
-        "للاستخدام التعليمي فقط. ليست نصيحة مالية. «العب و اكسب» ليست شركة وساطة؛ الاستثمارات افتراضية والعوائد غير مضمونة أبدًا.",
+        "Educational use only. Not financial advice. Ghiras is not a brokerage; investments are virtual and returns are never guaranteed.",
+        "للاستخدام التعليمي فقط. ليست نصيحة مالية. «غراس» ليست شركة وساطة؛ الاستثمارات افتراضية والعوائد غير مضمونة أبدًا.",
       )}
     </p>
   );
