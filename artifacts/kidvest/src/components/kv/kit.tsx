@@ -81,7 +81,7 @@ export function StatTile({
         <span className="text-sm font-extrabold text-muted-foreground">{label}</span>
         <span className={cn("grid h-10 w-10 place-items-center rounded-2xl", tones[tone])}>{icon}</span>
       </div>
-      <div data-testid={testId} className="font-num text-2xl font-bold md:text-[1.7rem]">{value}</div>
+      <div data-testid={testId} dir="ltr" className="font-num whitespace-nowrap text-2xl font-bold md:text-[1.7rem]">{value}</div>
       {hint && <div className="text-xs font-bold text-muted-foreground">{hint}</div>}
     </div>
   );
@@ -239,7 +239,7 @@ export function Disclaimer({ className }: { className?: string }) {
 export function SignedMoney({ value, className }: { value: number; className?: string }) {
   const { money } = useI18n();
   return (
-    <span className={cn("font-num font-bold", value > 0 ? "text-secondary" : value < 0 ? "text-destructive" : "text-muted-foreground", className)}>
+    <span dir="ltr" className={cn("font-num whitespace-nowrap font-bold", value > 0 ? "text-secondary" : value < 0 ? "text-destructive" : "text-muted-foreground", className)}>
       {value > 0 ? "+" : ""}{money(value)}
     </span>
   );

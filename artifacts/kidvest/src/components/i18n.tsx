@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { formatUsd } from "@/lib/formatting";
 
 export type Lang = "en" | "ar";
 
@@ -37,13 +38,12 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<Ctx>(() => {
     const locale = lang === "ar" ? "ar-EG-u-nu-latn" : "en-US";
-    const cur = new Intl.NumberFormat(locale, { style: "currency", currency: "USD" });
     return {
       lang,
       dir: lang === "ar" ? "rtl" : "ltr",
       setLang,
       tr: (en, ar) => (lang === "ar" ? ar : en),
-      money: (n) => cur.format(Number.isFinite(n as number) ? (n as number) : 0),
+      money: formatUsd,
       num: (n, digits = 2) =>
         new Intl.NumberFormat(locale, { maximumFractionDigits: digits }).format(Number.isFinite(n as number) ? (n as number) : 0),
       pct: (n) => {
