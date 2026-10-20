@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { ArrowRight, BadgeCheck, Coins, Compass, GraduationCap, LineChart, Send, Star, Wallet } from "lucide-react";
+import { ArrowRight, BadgeCheck, Coins, Compass, GraduationCap, LineChart, Send, Sprout, Star, Wallet } from "lucide-react";
 import { getGetDashboardQueryKey, getGetRequestsQueryKey, useGetDashboard, useGetRequests } from "@workspace/api-client-react";
 import { useI18n } from "@/components/i18n";
 import { Celebration } from "@/components/kv/celebration";
@@ -104,7 +104,7 @@ export default function KidDashboard() {
         </Panel>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Link href="/kid/explore" className="kv-rise flex items-center gap-4 rounded-[1.75rem] bg-accent p-6 text-accent-foreground shadow-[0_5px_16px_hsl(var(--accent-deep)/0.18)] transition hover:-translate-y-0.5" data-testid="link-explore">
           <Compass className="h-10 w-10" /><div><p className="font-display text-2xl font-extrabold">{tr("Go exploring", "انطلق للاستكشاف")}</p><p className="font-semibold">{tr("Search any ticker in the world.", "ابحث عن أي رمز في العالم.")}</p></div>
         </Link>
@@ -113,6 +113,9 @@ export default function KidDashboard() {
         </Link>
         <Link href="/kid/challenges" className="kv-rise flex items-center gap-4 rounded-[1.75rem] bg-primary p-6 text-primary-foreground shadow-[0_5px_16px_hsl(var(--primary)/0.2)] transition hover:-translate-y-0.5" data-testid="link-challenges">
           <BadgeCheck className="h-10 w-10" /><div><p className="font-display text-2xl font-extrabold">{tr("Try a challenge", "جرّب تحديًا")}</p><p className="font-semibold">{tr("Practice saving and investing.", "تدرّب على الادخار والاستثمار.")}</p></div>
+        </Link>
+        <Link href="/kid/sandbox" className="kv-rise flex items-center gap-4 rounded-[1.75rem] bg-secondary p-6 text-secondary-foreground shadow-[0_5px_16px_hsl(var(--secondary-deep)/0.18)] transition hover:-translate-y-0.5" data-testid="link-sandbox">
+          <Sprout className="h-10 w-10" /><div><p className="font-display text-2xl font-extrabold">{tr("Practice investing", "تدرّب على الاستثمار")}</p><p className="font-semibold">{tr("Use pretend money without approval.", "استخدم أموالًا افتراضية دون موافقة.")}</p></div>
         </Link>
       </div>
       <Panel data-testid="panel-achievements">

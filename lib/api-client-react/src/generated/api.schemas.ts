@@ -307,6 +307,61 @@ export interface Portfolio {
   history: Transaction[];
 }
 
+export interface SandboxHolding {
+  symbol: string;
+  companyName: string;
+  quantity: number;
+  avgBuyPrice: number;
+}
+
+export type SandboxTradeSide = typeof SandboxTradeSide[keyof typeof SandboxTradeSide];
+
+
+export const SandboxTradeSide = {
+  buy: 'buy',
+  sell: 'sell',
+} as const;
+
+export interface SandboxTrade {
+  id: string;
+  symbol: string;
+  companyName: string;
+  side: SandboxTradeSide;
+  quantity: number;
+  price: number;
+  total: number;
+  createdAt: string;
+}
+
+export interface SandboxPortfolio {
+  balance: number;
+  holdings: SandboxHolding[];
+  trades: SandboxTrade[];
+  practiceOnly: true;
+}
+
+export type SandboxTradeInputSide = typeof SandboxTradeInputSide[keyof typeof SandboxTradeInputSide];
+
+
+export const SandboxTradeInputSide = {
+  buy: 'buy',
+  sell: 'sell',
+} as const;
+
+export interface SandboxTradeInput {
+  /**
+     * @minLength 1
+     * @maxLength 20
+     */
+  symbol: string;
+  side: SandboxTradeInputSide;
+  /**
+     * @maximum 100000
+     * @exclusiveMinimum 0
+     */
+  quantity: number;
+}
+
 export interface Activity {
   id: string;
   action: string;

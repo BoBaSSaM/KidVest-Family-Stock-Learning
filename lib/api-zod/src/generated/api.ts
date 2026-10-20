@@ -391,6 +391,63 @@ export const GetPortfolioResponse = zod.object({
 })
 
 
+export const GetSandboxResponse = zod.object({
+  "balance": zod.number(),
+  "holdings": zod.array(zod.object({
+  "symbol": zod.string(),
+  "companyName": zod.string(),
+  "quantity": zod.number(),
+  "avgBuyPrice": zod.number()
+})),
+  "trades": zod.array(zod.object({
+  "id": zod.string(),
+  "symbol": zod.string(),
+  "companyName": zod.string(),
+  "side": zod.enum(['buy', 'sell']),
+  "quantity": zod.number(),
+  "price": zod.number(),
+  "total": zod.number(),
+  "createdAt": zod.string()
+})),
+  "practiceOnly": zod.literal(true)
+})
+
+
+export const placeSandboxTradeBodySymbolMax = 20;
+
+export const placeSandboxTradeBodyQuantityExclusiveMin = 0;
+export const placeSandboxTradeBodyQuantityMax = 100000;
+
+
+
+export const PlaceSandboxTradeBody = zod.object({
+  "symbol": zod.string().min(1).max(placeSandboxTradeBodySymbolMax),
+  "side": zod.enum(['buy', 'sell']),
+  "quantity": zod.number().gt(placeSandboxTradeBodyQuantityExclusiveMin).max(placeSandboxTradeBodyQuantityMax)
+})
+
+export const PlaceSandboxTradeResponse = zod.object({
+  "balance": zod.number(),
+  "holdings": zod.array(zod.object({
+  "symbol": zod.string(),
+  "companyName": zod.string(),
+  "quantity": zod.number(),
+  "avgBuyPrice": zod.number()
+})),
+  "trades": zod.array(zod.object({
+  "id": zod.string(),
+  "symbol": zod.string(),
+  "companyName": zod.string(),
+  "side": zod.enum(['buy', 'sell']),
+  "quantity": zod.number(),
+  "price": zod.number(),
+  "total": zod.number(),
+  "createdAt": zod.string()
+})),
+  "practiceOnly": zod.literal(true)
+})
+
+
 export const GetActivityResponseItem = zod.object({
   "id": zod.string(),
   "action": zod.string(),

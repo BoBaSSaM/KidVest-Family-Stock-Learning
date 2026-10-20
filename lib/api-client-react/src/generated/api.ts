@@ -43,6 +43,8 @@ import type {
   RequestInput,
   ReviewInput,
   ReviewResult,
+  SandboxPortfolio,
+  SandboxTradeInput,
   SearchStocksParams,
   SettingsInput,
   StartDemo200,
@@ -990,6 +992,159 @@ export function useGetPortfolio<TData = Awaited<ReturnType<typeof getPortfolio>>
 
 
 
+
+export const getGetSandboxUrl = () => {
+
+
+
+
+  return `/api/kv/sandbox`
+}
+
+export const getSandbox = async ( options?: Parameters<typeof customFetch>[1]): Promise<SandboxPortfolio> => {
+
+  return customFetch<SandboxPortfolio>(getGetSandboxUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSandboxQueryKey = () => {
+    return [
+    `/api/kv/sandbox`
+    ] as const;
+    }
+
+
+export const getGetSandboxQueryOptions = <TData = Awaited<ReturnType<typeof getSandbox>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSandbox>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSandboxQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSandbox>>> = ({ signal }) => getSandbox({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSandbox>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetSandboxQueryResult = NonNullable<Awaited<ReturnType<typeof getSandbox>>>
+export type GetSandboxQueryError = ErrorType<unknown>
+
+
+
+export function useGetSandbox<TData = Awaited<ReturnType<typeof getSandbox>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSandbox>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetSandboxQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getPlaceSandboxTradeUrl = () => {
+
+
+
+
+  return `/api/kv/sandbox/trades`
+}
+
+export const placeSandboxTrade = async (sandboxTradeInput: SandboxTradeInput, options?: Parameters<typeof customFetch>[1]): Promise<SandboxPortfolio> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<SandboxPortfolio>(getPlaceSandboxTradeUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(sandboxTradeInput)
+  }
+);}
+
+
+
+
+
+export const getPlaceSandboxTradeMutationKey = () => ['placeSandboxTrade'] as const;
+
+export const getPlaceSandboxTradeMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof placeSandboxTrade>>, TError,PlaceSandboxTradeMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof placeSandboxTrade>>, TError,PlaceSandboxTradeMutationVariables, TContext> => {
+
+const mutationKey = getPlaceSandboxTradeMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof placeSandboxTrade>>, PlaceSandboxTradeMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  placeSandboxTrade(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PlaceSandboxTradeMutationResult = NonNullable<Awaited<ReturnType<typeof placeSandboxTrade>>>
+    export type PlaceSandboxTradeMutationBody = BodyType<SandboxTradeInput>
+    export type PlaceSandboxTradeMutationError = ErrorType<unknown>
+    export type PlaceSandboxTradeMutationVariables = {data: BodyType<SandboxTradeInput>}
+
+    export const usePlaceSandboxTrade = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof placeSandboxTrade>>, TError,PlaceSandboxTradeMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof placeSandboxTrade>>,
+        TError,
+        PlaceSandboxTradeMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPlaceSandboxTradeMutationOptions(options));
+    }
 
 export const getGetActivityUrl = () => {
 

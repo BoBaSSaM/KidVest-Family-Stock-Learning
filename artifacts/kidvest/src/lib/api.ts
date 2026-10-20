@@ -6,7 +6,7 @@ import { z } from "zod";
 import {
   RegisterParentBody, CreateKidBody, UpdateKidBody, CreateRequestBody,
   ReviewRequestBody, FundWalletBody, UpdateSettingsBody, CompleteLessonBody, CompleteChallengeBody,
-  GetStockChartQueryParams, GetStockQuoteQueryParams, SearchStocksQueryParams, ConfirmPaymentBody, SandboxTradeInput,
+  GetStockChartQueryParams, GetStockQuoteQueryParams, SearchStocksQueryParams, ConfirmPaymentBody, PlaceSandboxTradeBody,
 } from "@workspace/api-zod";
 import { authOptions, rateLimit } from "./auth";
 import { demoEnabled } from "./demo-mode";
@@ -106,7 +106,7 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
     if (route === "kv/sandbox/trades" && method === "POST") {
       requireRole(user, "kid");
       rateLimit(`sandbox-trade:${user.id}`, 60, 60_000);
-      const data = SandboxTradeInput.parse(await body(req));
+      const data = PlaceSandboxTradeBody.parse(await body(req));
       const q = await quote(data.symbol, user.isDemo);
       ensureUsd(q.currency);
       return json(await mutateState(pid, s => {
