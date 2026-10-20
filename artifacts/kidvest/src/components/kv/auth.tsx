@@ -39,7 +39,7 @@ export function useDemoLaunch() {
   return { launch, pending };
 }
 
-export function DemoButton({ role, className, size = "md" }: { role: "parent" | "kid"; className?: string; size?: "md" | "lg" }) {
+export function DemoButton({ role, className, size = "md", testId }: { role: "parent" | "kid"; className?: string; size?: "md" | "lg" | "sm"; testId?: string }) {
   const { launch, pending } = useDemoLaunch();
   const { tr } = useI18n();
   return (
@@ -49,14 +49,14 @@ export function DemoButton({ role, className, size = "md" }: { role: "parent" | 
       className={className}
       disabled={pending !== null}
       onClick={() => launch(role)}
-      data-testid={`button-demo-${role}`}
+      data-testid={testId ?? `button-demo-${role}`}
     >
       <Sparkles className="h-5 w-5" />
       {pending === role
         ? tr("Building demo family...", "نجهّز العائلة التجريبية...")
         : role === "parent"
-          ? tr("Try the parent demo", "جرّب عرض الوالدين")
-          : tr("Try the kid demo", "جرّب عرض الطفل")}
+          ? tr("Try Parent View", "جرّب عرض الوالدين")
+          : tr("Try Kid View", "جرّب عرض الطفل")}
     </ToyButton>
   );
 }

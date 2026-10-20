@@ -251,6 +251,31 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/LessonResult" }
+  /kv/challenges:
+    get:
+      operationId: getChallenges
+      responses:
+        "200":
+          description: Saving and investing challenges with saved progress
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/Challenge" } }
+  /kv/challenges/{id}/complete:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: completeChallenge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChallengeAnswer" }
+      responses:
+        "200":
+          description: Challenge result and one-time rewards
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChallengeResult" }
   /stocks/search:
     get:
       operationId: searchStocks
@@ -332,7 +357,7 @@ components:
       allOf:
         - { $ref: "#/components/schemas/User" }
         - type: object
-          required: [balance, portfolioValue, gainLoss, dailyLimit, monthlyLimit, pendingCount]
+          required: [balance, portfolioValue, gainLoss, dailyLimit, monthlyLimit, pendingCount, xp, coins]
           properties:
             balance: { type: number }
             portfolioValue: { type: number }
@@ -340,6 +365,8 @@ components:
             dailyLimit: { type: number }
             monthlyLimit: { type: number }
             pendingCount: { type: integer }
+            xp: { type: integer }
+            coins: { type: integer }
     KidInput:
       type: object
       required: [name, username, password, age, avatar, dailyLimit, monthlyLimit]
@@ -532,14 +559,46 @@ components:
         answer: { type: integer, minimum: 0, maximum: 3 }
     LessonResult:
       type: object
-      required: [correct, message, xp]
+      required: [correct, message, xp, coins]
       properties:
         correct: { type: boolean }
         message: { type: string }
         xp: { type: integer }
+        coins: { type: integer }
+    Challenge:
+      type: object
+      required: [id, title, titleAr, description, descriptionAr, category, categoryAr, question, questionAr, options, optionsAr, xp, coins, completed]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        titleAr: { type: string }
+        description: { type: string }
+        descriptionAr: { type: string }
+        category: { type: string }
+        categoryAr: { type: string }
+        question: { type: string }
+        questionAr: { type: string }
+        options: { type: array, items: { type: string } }
+        optionsAr: { type: array, items: { type: string } }
+        xp: { type: integer }
+        coins: { type: integer }
+        completed: { type: boolean }
+    ChallengeAnswer:
+      type: object
+      required: [answer]
+      properties:
+        answer: { type: integer, minimum: 0, maximum: 3 }
+    ChallengeResult:
+      type: object
+      required: [correct, message, xp, coins]
+      properties:
+        correct: { type: boolean }
+        message: { type: string }
+        xp: { type: integer }
+        coins: { type: integer }
     Dashboard:
       type: object
-      required: [user, kids, totalValue, balance, gainLoss, pendingCount, requests, activity, chart, completedLessonCount, xp, marketSource, storageMode, stripeEnabled]
+      required: [user, kids, totalValue, balance, gainLoss, pendingCount, requests, activity, chart, completedLessonCount, completedChallengeCount, approvedRequestCount, xp, coins, marketSource, storageMode, stripeEnabled]
       properties:
         user: { $ref: "#/components/schemas/User" }
         kids: { type: array, items: { $ref: "#/components/schemas/Kid" } }
@@ -551,7 +610,10 @@ components:
         activity: { type: array, items: { $ref: "#/components/schemas/Activity" } }
         chart: { type: array, items: { $ref: "#/components/schemas/ChartPoint" } }
         completedLessonCount: { type: integer }
+        completedChallengeCount: { type: integer }
+        approvedRequestCount: { type: integer }
         xp: { type: integer }
+        coins: { type: integer }
         marketSource: { type: string }
         storageMode: { type: string }
         stripeEnabled: { type: boolean }

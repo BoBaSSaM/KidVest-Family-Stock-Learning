@@ -74,6 +74,7 @@ export default function ParentDashboard() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-extrabold">{k.name}</p>
                       <p className="text-xs font-bold text-muted-foreground">{tr("Wallet", "المحفظة")} {money(k.balance)}</p>
+                      <p className="mt-1 flex flex-wrap gap-x-2 text-[11px] font-extrabold text-primary"><span>{k.xp} XP</span><span>{k.coins} {tr("coins", "عملة")}</span></p>
                     </div>
                     <div className="text-end">
                       <p className="font-num font-bold">{money(k.portfolioValue)}</p>

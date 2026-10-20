@@ -55,6 +55,8 @@ export type Kid = User & {
   dailyLimit: number;
   monthlyLimit: number;
   pendingCount: number;
+  xp: number;
+  coins: number;
 };
 
 export interface KidInput {
@@ -400,6 +402,39 @@ export interface LessonResult {
   correct: boolean;
   message: string;
   xp: number;
+  coins: number;
+}
+
+export interface Challenge {
+  id: string;
+  title: string;
+  titleAr: string;
+  description: string;
+  descriptionAr: string;
+  category: string;
+  categoryAr: string;
+  question: string;
+  questionAr: string;
+  options: string[];
+  optionsAr: string[];
+  xp: number;
+  coins: number;
+  completed: boolean;
+}
+
+export interface ChallengeAnswer {
+  /**
+     * @minimum 0
+     * @maximum 3
+     */
+  answer: number;
+}
+
+export interface ChallengeResult {
+  correct: boolean;
+  message: string;
+  xp: number;
+  coins: number;
 }
 
 export interface Dashboard {
@@ -413,7 +448,10 @@ export interface Dashboard {
   activity: Activity[];
   chart: ChartPoint[];
   completedLessonCount: number;
+  completedChallengeCount: number;
+  approvedRequestCount: number;
   xp: number;
+  coins: number;
   marketSource: string;
   storageMode: string;
   stripeEnabled: boolean;

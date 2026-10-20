@@ -6,6 +6,9 @@
  */
 
 export * from './activity';
+export * from './challenge';
+export * from './challengeAnswer';
+export * from './challengeResult';
 export * from './chartPoint';
 export * from './dashboard';
 export * from './fundingInput';

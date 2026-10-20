@@ -83,7 +83,7 @@ function LessonDialog({ lesson, onClose }: { lesson: Lesson | null; onClose: () 
       onSuccess: (r) => {
         setResult(r);
         if (r.correct) {
-          toast.success(r.xp ? `+${r.xp} XP` : tr("Correct!", "صحيح!"));
+          toast.success(r.xp ? `+${r.xp} XP · +${r.coins} ${tr("coins", "عملة")}` : tr("Correct!", "صحيح!"));
           qc.invalidateQueries({ queryKey: getGetLessonsQueryKey() });
           qc.invalidateQueries({ queryKey: getGetDashboardQueryKey() });
         }
@@ -114,7 +114,7 @@ function LessonDialog({ lesson, onClose }: { lesson: Lesson | null; onClose: () 
           {result && (
             <div role="status" className={cn("kv-pop flex gap-3 rounded-2xl p-4 font-bold", result.correct ? "bg-secondary/15 text-secondary" : "bg-destructive/12 text-destructive")} data-testid="text-lesson-result">
               {result.correct ? <CheckCircle2 className="h-6 w-6 shrink-0" /> : <XCircle className="h-6 w-6 shrink-0" />}
-              <p>{result.message}{result.correct && result.xp > 0 && ` +${result.xp} XP`}</p>
+              <p>{result.message}{result.correct && result.xp > 0 && ` +${result.xp} XP · +${result.coins} ${tr("coins", "عملة")}`}</p>
             </div>
           )}
           {result?.correct ? (

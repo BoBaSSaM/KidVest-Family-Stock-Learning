@@ -61,11 +61,13 @@ function KidCard({ kid, delay, onEdit, onReset, onDelete }: { kid: Kid; delay: n
           <p className="text-sm font-bold text-muted-foreground">@{kid.username} · {tr("age", "العمر")} {kid.age}</p>
         </div>
       </div>
-      <dl className="grid grid-cols-3 gap-2 text-center">
+      <dl className="grid grid-cols-2 gap-2 text-center sm:grid-cols-3">
         {[
           [tr("Wallet", "المحفظة"), money(kid.balance)],
           [tr("Portfolio", "المحفظة الاستثمارية"), money(kid.portfolioValue)],
           [tr("Lessons", "الدروس"), String(kid.completedLessons.length)],
+          [tr("Experience", "الخبرة"), `${kid.xp} XP`],
+          [tr("Coins", "العملات"), String(kid.coins)],
         ].map(([l, v]) => (
           <div key={l} className="rounded-2xl bg-muted p-3"><dt className="text-[11px] font-black uppercase tracking-wider text-muted-foreground">{l}</dt><dd className="font-num font-bold">{v}</dd></div>
         ))}

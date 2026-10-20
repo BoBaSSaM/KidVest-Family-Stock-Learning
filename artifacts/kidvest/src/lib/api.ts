@@ -5,10 +5,11 @@ import { hash, compare } from "bcryptjs";
 import { z } from "zod";
 import {
   RegisterParentBody, CreateKidBody, UpdateKidBody, CreateRequestBody,
-  ReviewRequestBody, FundWalletBody, UpdateSettingsBody, CompleteLessonBody,
+  ReviewRequestBody, FundWalletBody, UpdateSettingsBody, CompleteLessonBody, CompleteChallengeBody,
   GetStockChartQueryParams, GetStockQuoteQueryParams, SearchStocksQueryParams, ConfirmPaymentBody,
 } from "@workspace/api-zod";
 import { authOptions, rateLimit } from "./auth";
+import { demoEnabled } from "./demo-mode";
 import { authVersion, replacePassword, requireCurrentSession } from "./session-version";
 import { findUser, mutateState, readState, storageMode } from "./store";
 import { HttpError, cents, now, publicUser, type State, type StoredUser } from "./domain";
@@ -16,6 +17,8 @@ import { createDemoFamily, logActivity } from "./seed";
 import { chart, quote, search, popular } from "./market";
 import { kidView, portfolio, ledgerChart } from "./portfolio";
 import { lessonCatalog } from "./lessons";
+import { challengeCatalog } from "./challenges";
+import { familyRewards, kidRewards } from "./rewards";
 import { approveTrade } from "./trading";
 import { ownedPayment, startCheckout } from "./payments";
 import { ensureStripeReady, stripeConfigured } from "./stripe-setup";
@@ -63,7 +66,7 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
     if (route === "healthz" && method === "GET") return json({ status: "ok" });
     if (route === "kv/demo" && method === "POST") {
-      if (process.env.NODE_ENV === "production" && process.env.ENABLE_DEMO !== "true") throw new HttpError(403, "Demo mode is disabled.");
+      if (!demoEnabled()) throw new HttpError(403, "Demo mode is disabled.");
       rateLimit(`demo:${ip}`, 12, 60 * 60 * 1000);
       return json(await createDemoFamily());
     }
@@ -73,7 +76,7 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
       const email = data.email.trim().toLowerCase();
       if (await findUser(email)) throw new HttpError(409, "An account already uses this email.");
       const id = randomUUID();
-      const user: StoredUser = { id, name: data.name.trim(), email, identifier: email, passwordHash: await hash(data.password, 12), role: "parent", avatar: "parent", isDemo: storageMode() === "local-demo", completedLessons: [], notifications: true, dailyLimit: 0, monthlyLimit: 0, createdAt: now(), revision: 0, authVersion: 0 };
+      const user: StoredUser = { id, name: data.name.trim(), email, identifier: email, passwordHash: await hash(data.password, 12), role: "parent", avatar: "parent", isDemo: storageMode() === "local-demo", completedLessons: [], completedChallenges: [], notifications: true, dailyLimit: 0, monthlyLimit: 0, createdAt: now(), revision: 0, authVersion: 0 };
       if (user.name.length < 2) throw new HttpError(400, "Please enter your name.");
       await mutateState(id, s => {
         if (s.users.some(u => u.identifier === email)) throw new HttpError(409, "An account already uses this email.");
@@ -135,7 +138,7 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
         const name = data.name.trim();
         if (name.length < 2) throw new HttpError(400, "Please enter your child's name.");
         if (await findUser(username)) throw new HttpError(409, "This username is already taken.");
-        const kid: StoredUser = { ...data, id: randomUUID(), name, username, identifier: username, passwordHash: await hash(data.password, 12), role: "kid", parentId: pid, isDemo: user.isDemo, notifications: true, completedLessons: [], revision: 0, authVersion: 0, createdAt: now() };
+        const kid: StoredUser = { ...data, id: randomUUID(), name, username, identifier: username, passwordHash: await hash(data.password, 12), role: "kid", parentId: pid, isDemo: user.isDemo, notifications: true, completedLessons: [], completedChallenges: [], revision: 0, authVersion: 0, createdAt: now() };
         // Never persist plaintext passwords from the parsed input.
         delete (kid as StoredUser & { password?: string }).password;
         const safe = await mutateState(pid, s => {
@@ -305,13 +308,35 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
       const lesson = lessonCatalog.find(l => l.id === path[2]);
       if (!lesson) throw new HttpError(404, "Lesson not found.");
       const data = CompleteLessonBody.parse(await body(req));
-      if (data.answer !== lesson.answer) return json({ correct: false, message: "Not quite! Read the lesson and try again. You can do this.", xp: 0 });
+      if (data.answer !== lesson.answer) return json({ correct: false, message: "Not quite! Read the lesson and try again. You can do this.", xp: 0, coins: 0 });
       return json(await mutateState(pid, s => {
         const kid = ownKid(s, user, user.id);
-        if (kid.completedLessons.includes(lesson.id)) return { correct: true, message: "You've already earned this badge. Great practice!", xp: 0 };
+        if (kid.completedLessons.includes(lesson.id)) return { correct: true, message: "You've already earned this badge. Great practice!", xp: 0, coins: 0 };
         kid.completedLessons.push(lesson.id);
-        logActivity(s, kid, "lesson", `${kid.name} completed “${lesson.title}”.`, kid.id);
-        return { correct: true, message: "Well done! You earned a new learning badge.", xp: lesson.xp };
+        logActivity(s, kid, "lesson", `${kid.name} completed “${lesson.title}” and earned ${lesson.xp} XP and 10 game coins.`, kid.id);
+        return { correct: true, message: "Well done! You earned a new learning badge.", xp: lesson.xp, coins: 10 };
+      }));
+    }
+    if (route === "kv/challenges" && method === "GET") {
+      requireRole(user, "kid");
+      return json(challengeCatalog.map(({ answer: _answer, ...challenge }) => ({
+        ...challenge,
+        completed: (user.completedChallenges ?? []).includes(challenge.id),
+      })));
+    }
+    if (path[0] === "kv" && path[1] === "challenges" && path[3] === "complete" && path.length === 4 && method === "POST") {
+      requireRole(user, "kid");
+      const challenge = challengeCatalog.find(item => item.id === path[2]);
+      if (!challenge) throw new HttpError(404, "Challenge not found.");
+      const data = CompleteChallengeBody.parse(await body(req));
+      if (data.answer !== challenge.answer) return json({ correct: false, message: "Not quite. Think it through and try again.", xp: 0, coins: 0 });
+      return json(await mutateState(pid, s => {
+        const kid = ownKid(s, user, user.id);
+        kid.completedChallenges ??= [];
+        if (kid.completedChallenges.includes(challenge.id)) return { correct: true, message: "You already earned these rewards. Great practice!", xp: 0, coins: 0 };
+        kid.completedChallenges.push(challenge.id);
+        logActivity(s, kid, "challenge", `${kid.name} completed the “${challenge.title}” challenge and earned ${challenge.xp} XP and ${challenge.coins} coins.`, kid.id);
+        return { correct: true, message: "Challenge complete. Your island is growing!", xp: challenge.xp, coins: challenge.coins };
       }));
     }
     if (route === "kv/dashboard" && method === "GET") {
@@ -321,13 +346,17 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
       const p = await portfolio(s, ids, user.isDemo);
       const requests = s.requests.filter(r => ids.includes(r.kidId)).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
       const activity = s.activity.filter(a => user.role === "parent" || a.kidId === user.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 8);
+      const rewardSummary = user.role === "parent" ? familyRewards(kids, s.requests) : kidRewards(user, s.requests);
       return json({
         user: publicUser(user), kids: await Promise.all(kids.map(k => kidView(s, k))),
         totalValue: p.totalValue, balance: p.balance, gainLoss: p.gainLoss,
         pendingCount: requests.filter(r => r.status === "pending").length,
         requests: requests.slice(0, 6), activity, chart: ledgerChart(s, ids),
-        completedLessonCount: kids.reduce((a, k) => a + k.completedLessons.length, 0),
-        xp: lessonCatalog.filter(l => user.completedLessons.includes(l.id)).reduce((a, l) => a + l.xp, 0),
+        completedLessonCount: rewardSummary.completedLessonCount,
+        completedChallengeCount: rewardSummary.completedChallengeCount,
+        approvedRequestCount: rewardSummary.approvedRequestCount,
+        xp: rewardSummary.xp,
+        coins: rewardSummary.coins,
         marketSource: user.isDemo ? "demo" : "live", storageMode: storageMode(), stripeEnabled: stripeConfigured(),
       });
     }

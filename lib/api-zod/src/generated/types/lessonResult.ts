@@ -9,4 +9,5 @@ export interface LessonResult {
   correct: boolean;
   message: string;
   xp: number;
+  coins: number;
 }

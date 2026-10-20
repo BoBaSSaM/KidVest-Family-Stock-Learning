@@ -13,4 +13,6 @@ export type Kid = User & {
   dailyLimit: number;
   monthlyLimit: number;
   pendingCount: number;
+  xp: number;
+  coins: number;
 };

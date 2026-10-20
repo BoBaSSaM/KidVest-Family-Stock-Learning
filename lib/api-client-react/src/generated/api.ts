@@ -20,6 +20,9 @@ import type {
 
 import type {
   Activity,
+  Challenge,
+  ChallengeAnswer,
+  ChallengeResult,
   Dashboard,
   FundingInput,
   GetPaymentSetup200,
@@ -1670,6 +1673,160 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getCompleteLessonMutationOptions(options));
+    }
+
+export const getGetChallengesUrl = () => {
+
+
+
+
+  return `/api/kv/challenges`
+}
+
+export const getChallenges = async ( options?: Parameters<typeof customFetch>[1]): Promise<Challenge[]> => {
+
+  return customFetch<Challenge[]>(getGetChallengesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetChallengesQueryKey = () => {
+    return [
+    `/api/kv/challenges`
+    ] as const;
+    }
+
+
+export const getGetChallengesQueryOptions = <TData = Awaited<ReturnType<typeof getChallenges>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getChallenges>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetChallengesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getChallenges>>> = ({ signal }) => getChallenges({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getChallenges>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetChallengesQueryResult = NonNullable<Awaited<ReturnType<typeof getChallenges>>>
+export type GetChallengesQueryError = ErrorType<unknown>
+
+
+
+export function useGetChallenges<TData = Awaited<ReturnType<typeof getChallenges>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getChallenges>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetChallengesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCompleteChallengeUrl = (id: string,) => {
+
+
+
+
+  return `/api/kv/challenges/${id}/complete`
+}
+
+export const completeChallenge = async (id: string,
+    challengeAnswer: ChallengeAnswer, options?: Parameters<typeof customFetch>[1]): Promise<ChallengeResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ChallengeResult>(getCompleteChallengeUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(challengeAnswer)
+  }
+);}
+
+
+
+
+
+export const getCompleteChallengeMutationKey = () => ['completeChallenge'] as const;
+
+export const getCompleteChallengeMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeChallenge>>, TError,CompleteChallengeMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof completeChallenge>>, TError,CompleteChallengeMutationVariables, TContext> => {
+
+const mutationKey = getCompleteChallengeMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof completeChallenge>>, CompleteChallengeMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  completeChallenge(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CompleteChallengeMutationResult = NonNullable<Awaited<ReturnType<typeof completeChallenge>>>
+    export type CompleteChallengeMutationBody = BodyType<ChallengeAnswer>
+    export type CompleteChallengeMutationError = ErrorType<unknown>
+    export type CompleteChallengeMutationVariables = {id: string;data: BodyType<ChallengeAnswer>}
+
+    export const useCompleteChallenge = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeChallenge>>, TError,CompleteChallengeMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof completeChallenge>>,
+        TError,
+        CompleteChallengeMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCompleteChallengeMutationOptions(options));
     }
 
 export const getSearchStocksUrl = (params: SearchStocksParams,) => {

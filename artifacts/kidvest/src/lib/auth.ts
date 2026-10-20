@@ -7,6 +7,7 @@ import { z } from "zod";
 import { findUser, findDemoUser } from "./store";
 import { HttpError } from "./domain";
 import { authVersion, requireCurrentSession } from "./session-version";
+import { demoEnabled } from "./demo-mode";
 
 type Limiter = Map<string, { count: number; reset: number }>;
 const root = globalThis as typeof globalThis & { kidvestLimiter?: Limiter; kidvestSecret?: string };
@@ -43,7 +44,7 @@ export const authOptions: NextAuthOptions = {
         const ip = String(req.headers?.["x-forwarded-for"] || "unknown").split(",")[0];
         rateLimit(`login:${ip}`, 30);
         if (raw?.demoKey) {
-          if (process.env.NODE_ENV === "production" && process.env.ENABLE_DEMO !== "true") return null;
+          if (!demoEnabled()) return null;
           const parsed = z.object({ demoKey: z.string().regex(/^[a-f0-9]{64}$/), role: z.enum(["parent", "kid"]) }).safeParse(raw);
           if (!parsed.success) return null;
           const user = await findDemoUser(parsed.data.demoKey, parsed.data.role);

@@ -419,10 +419,14 @@ body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-in
 @keyframes kv-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes kv-float { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-12px) rotate(1.5deg); } }
 @keyframes kv-pop { 0% { transform: scale(.6); opacity: 0; } 70% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes kv-celebrate { 0% { transform: scale(.65) rotate(-12deg); opacity: 0; } 70% { transform: scale(1.12) rotate(6deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
+@keyframes kv-confetti-fall { 0% { opacity: 0; translate: 0 -1rem; } 15% { opacity: 1; } 100% { opacity: 0; translate: 0 8rem; } }
 @keyframes kv-shimmer { 0% { opacity: .55 } 50% { opacity: 1 } 100% { opacity: .55 } }
 .kv-rise { animation: kv-rise .55s cubic-bezier(.2,.8,.2,1) both; }
 .kv-float { animation: kv-float 6s ease-in-out infinite; }
 .kv-pop { animation: kv-pop .45s cubic-bezier(.2,.9,.3,1.4) both; }
+.kv-celebrate-icon { animation: kv-celebrate .65s cubic-bezier(.2,.9,.3,1.4) both; }
+.kv-confetti-piece { position: absolute; top: 0; width: .45rem; height: .75rem; border-radius: .2rem; animation: kv-confetti-fall 1.4s ease-out both; }
 .kv-skel { background: hsl(var(--muted)); border-radius: 1rem; animation: kv-shimmer 1.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }

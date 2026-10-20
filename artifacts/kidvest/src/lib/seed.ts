@@ -4,7 +4,7 @@ import { mutateState } from "./store";
 import { now, type StoredUser, type State } from "./domain";
 
 function account(data: Partial<StoredUser> & Pick<StoredUser, "id" | "name" | "identifier" | "role" | "passwordHash">): StoredUser {
-  return { avatar: "fox", isDemo: true, notifications: true, completedLessons: [], dailyLimit: 1000, monthlyLimit: 5000, revision: 0, authVersion: 0, createdAt: now(), ...data };
+  return { avatar: "fox", isDemo: true, notifications: true, completedLessons: [], completedChallenges: [], dailyLimit: 1000, monthlyLimit: 5000, revision: 0, authVersion: 0, createdAt: now(), ...data };
 }
 export async function createDemoFamily() {
   const parentId = randomUUID();
@@ -12,8 +12,8 @@ export async function createDemoFamily() {
   // Demo credentials are unguessable and are never shown or reused between visitors.
   const passwordHash = await hash(randomBytes(32).toString("hex"), 12);
   const parent = account({ id: parentId, name: "Alex Morgan", identifier: `demo-${parentId}@kidvest.example`, email: `demo-${parentId}@kidvest.example`, role: "parent", avatar: "parent", passwordHash, demoKey });
-  const kid1 = account({ id: randomUUID(), name: "Oliver", identifier: `oliver-${parentId}`, username: `oliver-${parentId.slice(0, 6)}`, role: "kid", parentId, age: 10, avatar: "fox", passwordHash, demoKey });
-  const kid2 = account({ id: randomUUID(), name: "Sophie", identifier: `sophie-${parentId}`, username: `sophie-${parentId.slice(0, 6)}`, role: "kid", parentId, age: 8, avatar: "bunny", passwordHash, completedLessons: ["what-is-a-stock"] });
+  const kid1 = account({ id: randomUUID(), name: "Oliver", identifier: `oliver-${parentId}`, username: `oliver-${parentId.slice(0, 6)}`, role: "kid", parentId, age: 10, avatar: "fox", passwordHash, demoKey, completedLessons: ["what-is-a-stock"], completedChallenges: ["saving-goal"] });
+  const kid2 = account({ id: randomUUID(), name: "Sophie", identifier: `sophie-${parentId}`, username: `sophie-${parentId.slice(0, 6)}`, role: "kid", parentId, age: 8, avatar: "bunny", passwordHash, completedLessons: ["what-is-a-stock"], completedChallenges: ["mix-it-up"] });
   await mutateState(parentId, s => {
     s.users.push(parent, kid1, kid2);
     s.wallets.push({ id: randomUUID(), kidId: kid1.id, parentId, balance: 450, currency: "USD" }, { id: randomUUID(), kidId: kid2.id, parentId, balance: 300, currency: "USD" });

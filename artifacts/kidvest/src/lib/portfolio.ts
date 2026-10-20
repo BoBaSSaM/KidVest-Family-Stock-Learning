@@ -1,6 +1,7 @@
 import type { Kid, Portfolio, ChartPoint } from "@workspace/api-client-react";
 import { cents, publicUser, type State, type StoredUser } from "./domain";
 import { quote } from "./market";
+import { kidRewards } from "./rewards";
 export async function portfolio(s: State, kidIds: string[], demo: boolean): Promise<Portfolio> {
   const own = s.holdings.filter(h => kidIds.includes(h.kidId));
   const quotes = new Map(await Promise.all([...new Set(own.map(h => h.symbol))].map(async symbol => [symbol, await quote(symbol, demo)] as const)));
@@ -20,7 +21,8 @@ export async function portfolio(s: State, kidIds: string[], demo: boolean): Prom
 }
 export async function kidView(s: State, kid: StoredUser): Promise<Kid> {
   const p = await portfolio(s, [kid.id], kid.isDemo);
-  return { ...publicUser(kid), balance: p.balance, portfolioValue: p.totalValue, gainLoss: p.gainLoss, dailyLimit: kid.dailyLimit, monthlyLimit: kid.monthlyLimit, pendingCount: s.requests.filter(r => r.kidId === kid.id && r.status === "pending").length };
+  const rewards = kidRewards(kid, s.requests);
+  return { ...publicUser(kid), balance: p.balance, portfolioValue: p.totalValue, gainLoss: p.gainLoss, dailyLimit: kid.dailyLimit, monthlyLimit: kid.monthlyLimit, pendingCount: s.requests.filter(r => r.kidId === kid.id && r.status === "pending").length, xp: rewards.xp, coins: rewards.coins };
 }
 // Plot invested cost from actual purchases/sales, not a fabricated value-performance series.
 export function ledgerChart(s: State, kidIds: string[]): ChartPoint[] {

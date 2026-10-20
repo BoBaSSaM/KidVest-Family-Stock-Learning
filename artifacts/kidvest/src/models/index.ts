@@ -9,7 +9,7 @@ const userSchema = new Schema({
   role: { type: String, enum: ["parent", "kid"], required: true },
   parentId: { type: String, index: true }, age: Number, avatar: String,
   isDemo: Boolean, demoKey: { type: String, index: true }, notifications: Boolean,
-  dailyLimit: Number, monthlyLimit: Number, completedLessons: [String],
+  dailyLimit: Number, monthlyLimit: Number, completedLessons: [String], completedChallenges: [String],
   revision: { type: Number, default: 0 },
   authVersion: { type: Number, default: 0, min: 0 }, createdAt: String,
 }, { versionKey: false });

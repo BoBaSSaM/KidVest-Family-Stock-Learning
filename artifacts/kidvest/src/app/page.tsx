@@ -6,6 +6,7 @@ import {
   ArrowRight, BadgeCheck, Compass, GraduationCap, HandCoins, LineChart, Lock, MessageCircleHeart, ShieldCheck, Telescope, Users,
 } from "lucide-react";
 import { useI18n } from "@/components/i18n";
+import { DemoButton } from "@/components/kv/auth";
 import { Disclaimer, LangToggle, Logo, ThemeToggle, ToyLink } from "@/components/kv/kit";
 import { useKvUser } from "@/components/kv/shell";
 
@@ -85,6 +86,12 @@ export default function Landing() {
                 {tr("Already have a kid account? Sign in", "لديك حساب طفل؟ سجّل الدخول")}
               </Link>
             </div>
+              {status !== "authenticated" && (
+                <div className="mt-4 flex flex-wrap gap-2" aria-label={tr("Explore without registering", "استكشف دون تسجيل")}>
+                  <DemoButton role="kid" size="sm" testId="button-demo-kid-landing" />
+                  <DemoButton role="parent" size="sm" testId="button-demo-parent-landing" />
+                </div>
+              )}
           </div>
           <ul className="grid content-center gap-3 sm:grid-cols-2 md:grid-cols-1">
             {[

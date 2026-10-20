@@ -11,12 +11,14 @@ import {
   EmptyState, ErrorState, KvAvatar, PageHeader, Panel, Skel, SourceChip, ToyButton, errMsg, useInvalidateFamily,
 } from "@/components/kv/kit";
 import { StatusPill, TickerBlock, TypeTag } from "@/components/kv/status";
+import { Celebration } from "@/components/kv/celebration";
 
 const FILTERS = ["pending", "approved", "rejected", "cancelled", "all"] as const;
 
 export default function ParentRequests() {
   const { tr } = useI18n();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("pending");
+  const [celebrate, setCelebrate] = useState(false);
   const q = useGetRequests({ query: { refetchInterval: 10_000, queryKey: getGetRequestsQueryKey() } });
   const list = (q.data ?? []).filter((r) => filter === "all" || r.status === filter);
   const labels: Record<string, string> = {
@@ -45,9 +47,17 @@ export default function ParentRequests() {
         <EmptyState icon={<Inbox className="h-8 w-8" />} title={filter === "pending" ? tr("All caught up", "لا شيء معلق") : tr("Nothing here", "لا شيء هنا")} body={tr("New requests appear automatically.", "تظهر الطلبات الجديدة تلقائيًا.")} />
       ) : (
         <div className="space-y-4">
-          {list.map((r) => (r.status === "pending" ? <PendingCard key={r.id} r={r} /> : <DoneCard key={r.id} r={r} />))}
+          {list.map((r) => (r.status === "pending" ? <PendingCard key={r.id} r={r} onApproved={() => setCelebrate(true)} /> : <DoneCard key={r.id} r={r} />))}
         </div>
       )}
+      <Celebration
+        open={celebrate}
+        onClose={() => setCelebrate(false)}
+        title={tr("A great learning moment!", "لحظة تعلّم رائعة!")}
+        description={tr("Your explorer earned a reward for completing this parent-reviewed activity.", "حصل مستكشفك على مكافأة لإكمال هذا النشاط بمراجعتك.")}
+        xp={25}
+        coins={5}
+      />
     </div>
   );
 }
@@ -68,7 +78,7 @@ function Header({ r }: { r: StockRequest }) {
   );
 }
 
-function PendingCard({ r }: { r: StockRequest }) {
+function PendingCard({ r, onApproved }: { r: StockRequest; onApproved: () => void }) {
   const { tr, money, num, pct } = useI18n();
   const invalidate = useInvalidateFamily();
   const review = useReviewRequest();
@@ -88,7 +98,10 @@ function PendingCard({ r }: { r: StockRequest }) {
       {
         onSuccess: (res) => {
           if (res.checkoutUrl) { setCheckout(res.checkoutUrl); window.location.assign(res.checkoutUrl); return; }
-          if (res.success) toast.success(res.message || (action === "approve" ? tr("Approved", "تمت الموافقة") : tr("Declined", "تم الرفض")));
+          if (res.success) {
+            toast.success(res.message || (action === "approve" ? tr("Approved", "تمت الموافقة") : tr("Declined", "تم الرفض")));
+            if (action === "approve") onApproved();
+          }
           else {
             toast.error(res.message, { description: res.missingAmount ? `${tr("Missing", "ينقص")} ${money(res.missingAmount)}` : undefined });
             setMissing(res.missingAmount ?? null);

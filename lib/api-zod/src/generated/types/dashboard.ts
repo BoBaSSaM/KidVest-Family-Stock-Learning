@@ -21,7 +21,10 @@ export interface Dashboard {
   activity: Activity[];
   chart: ChartPoint[];
   completedLessonCount: number;
+  completedChallengeCount: number;
+  approvedRequestCount: number;
   xp: number;
+  coins: number;
   marketSource: string;
   storageMode: string;
   stripeEnabled: boolean;

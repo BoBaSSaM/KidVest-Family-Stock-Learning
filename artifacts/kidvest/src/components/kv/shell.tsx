@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, type ReactNode } from "react";
 import {
-  Briefcase, Compass, GraduationCap, History, Home, Inbox, LayoutGrid, LogOut, PieChart, Repeat, Send, Settings, Users, Wallet,
+  Briefcase, Compass, GraduationCap, History, Home, Inbox, LayoutGrid, LogOut, PieChart, Repeat, Send, Settings, Sparkles, Users, Wallet,
 } from "lucide-react";
 import { getGetRequestsQueryKey, useGetRequests } from "@workspace/api-client-react";
 import { cn } from "@/lib/utils";
@@ -58,6 +58,7 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
           { href: "/kid/requests", icon: Send, label: tr("Requests", "طلباتي"), badge: pending },
           { href: "/kid/portfolio", icon: Briefcase, label: tr("Backpack", "حقيبتي") },
           { href: "/kid/learn", icon: GraduationCap, label: tr("Learn", "تعلّم") },
+          { href: "/kid/challenges", icon: Sparkles, label: tr("Challenges", "التحديات") },
         ];
 
   if (!ready) {

@@ -5,6 +5,7 @@ export type StoredUser = User & {
   identifier: string;
   dailyLimit: number;
   monthlyLimit: number;
+  completedChallenges?: string[];
   demoKey?: string;
   authVersion?: number;
   revision: number;
@@ -36,7 +37,7 @@ export const emptyState = (): State => ({ users: [], wallets: [], requests: [], 
 export const cents = (amount: number) => Math.round((amount + Number.EPSILON) * 100) / 100;
 export const now = () => new Date().toISOString();
 export function publicUser(user: StoredUser): User {
-  const { passwordHash: _hash, identifier: _identifier, demoKey: _demo, authVersion: _auth, revision: _rev, dailyLimit: _day, monthlyLimit: _month, createdAt: _date, ...safe } = user;
+  const { passwordHash: _hash, identifier: _identifier, demoKey: _demo, authVersion: _auth, revision: _rev, dailyLimit: _day, monthlyLimit: _month, completedChallenges: _challenges, createdAt: _date, ...safe } = user;
   return safe;
 }
 export class HttpError extends Error {

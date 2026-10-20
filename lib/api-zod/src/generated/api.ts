@@ -78,7 +78,9 @@ export const GetDashboardResponse = zod.object({
   "gainLoss": zod.number(),
   "dailyLimit": zod.number(),
   "monthlyLimit": zod.number(),
-  "pendingCount": zod.number().int()
+  "pendingCount": zod.number().int(),
+  "xp": zod.number().int(),
+  "coins": zod.number().int()
 }))),
   "totalValue": zod.number(),
   "balance": zod.number(),
@@ -115,7 +117,10 @@ export const GetDashboardResponse = zod.object({
   "value": zod.number()
 })),
   "completedLessonCount": zod.number().int(),
+  "completedChallengeCount": zod.number().int(),
+  "approvedRequestCount": zod.number().int(),
   "xp": zod.number().int(),
+  "coins": zod.number().int(),
   "marketSource": zod.string(),
   "storageMode": zod.string(),
   "stripeEnabled": zod.boolean()
@@ -140,7 +145,9 @@ export const GetKidsResponseItem = zod.object({
   "gainLoss": zod.number(),
   "dailyLimit": zod.number(),
   "monthlyLimit": zod.number(),
-  "pendingCount": zod.number().int()
+  "pendingCount": zod.number().int(),
+  "xp": zod.number().int(),
+  "coins": zod.number().int()
 }))
 export const GetKidsResponse = zod.array(GetKidsResponseItem)
 
@@ -191,7 +198,9 @@ export const CreateKidResponse = zod.object({
   "gainLoss": zod.number(),
   "dailyLimit": zod.number(),
   "monthlyLimit": zod.number(),
-  "pendingCount": zod.number().int()
+  "pendingCount": zod.number().int(),
+  "xp": zod.number().int(),
+  "coins": zod.number().int()
 }))
 
 
@@ -245,7 +254,9 @@ export const UpdateKidResponse = zod.object({
   "gainLoss": zod.number(),
   "dailyLimit": zod.number(),
   "monthlyLimit": zod.number(),
-  "pendingCount": zod.number().int()
+  "pendingCount": zod.number().int(),
+  "xp": zod.number().int(),
+  "coins": zod.number().int()
 }))
 
 
@@ -525,7 +536,48 @@ export const CompleteLessonBody = zod.object({
 export const CompleteLessonResponse = zod.object({
   "correct": zod.boolean(),
   "message": zod.string(),
-  "xp": zod.number().int()
+  "xp": zod.number().int(),
+  "coins": zod.number().int()
+})
+
+
+export const GetChallengesResponseItem = zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "titleAr": zod.string(),
+  "description": zod.string(),
+  "descriptionAr": zod.string(),
+  "category": zod.string(),
+  "categoryAr": zod.string(),
+  "question": zod.string(),
+  "questionAr": zod.string(),
+  "options": zod.array(zod.string()),
+  "optionsAr": zod.array(zod.string()),
+  "xp": zod.number().int(),
+  "coins": zod.number().int(),
+  "completed": zod.boolean()
+})
+export const GetChallengesResponse = zod.array(GetChallengesResponseItem)
+
+
+export const CompleteChallengeParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const completeChallengeBodyAnswerMin = 0;
+export const completeChallengeBodyAnswerMax = 3;
+
+
+
+export const CompleteChallengeBody = zod.object({
+  "answer": zod.number().int().min(completeChallengeBodyAnswerMin).max(completeChallengeBodyAnswerMax)
+})
+
+export const CompleteChallengeResponse = zod.object({
+  "correct": zod.boolean(),
+  "message": zod.string(),
+  "xp": zod.number().int(),
+  "coins": zod.number().int()
 })
 
 

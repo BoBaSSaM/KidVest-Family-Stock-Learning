@@ -73,7 +73,7 @@ Spending limits are in USD and use UTC calendar days/months. Zero means no spend
 
 ## Demo and seed
 
-The landing-page demo creates an isolated sample family with one parent, two kids, sample holdings and pending requests. Its secret demo key is generated randomly per visitor and is never a hardcoded shared account.
+The landing-page demo creates an isolated sample family with one parent, two kids, sample holdings, learning progress, rewards and pending requests. Its secret demo key is generated randomly per visitor and is never a hardcoded shared account. Demo mode is enabled by default so Vercel previews and production can use the public demo buttons; set `ENABLE_DEMO=false` in the deployment environment to disable it.
 
 Demo market fixtures are dated sample prices, not live quotes; charts are explicitly sample data. Unknown symbols use Yahoo Finance and fail explicitly if unavailable. Regular accounts use Yahoo prices and never silently substitute sample values.
 
@@ -83,7 +83,9 @@ npm run seed
 
 The seed script creates `parent@kidvest.example`, `demo_oliver` and `demo_sophie`. It generates a random password at runtime and displays it once in the local terminal; it never overwrites existing accounts.
 
-If MongoDB is absent in development, a **development-only** local JSON learning store is used and clearly reported by the dashboard. This is not a payment database. Production refuses local storage. A configured but unreachable MongoDB never silently falls back. Demo accounts are not a security boundary against their own visitor; keep public demo mode disabled for real family use.
+If MongoDB is absent in development, a **development-only** local JSON learning store is used and clearly reported by the dashboard. This is not a payment database. Production refuses local storage. A configured but unreachable MongoDB never silently falls back. Demo data is written under a newly generated family ID and cannot access or mutate another family. Vercel needs `MONGODB_URI`, `NEXTAUTH_URL` set to the deployment's HTTPS URL, and `NEXTAUTH_SECRET` (or `SESSION_SECRET`) configured in its own project environment; Replit secrets do not automatically transfer to Vercel. Stripe is optional and remains test-only.
+
+Gamification rewards are derived from completed lessons, completed challenges and parent-approved requests, so retrying a request cannot duplicate XP or coins. Challenges and rewards are saved in the child's family record and are never attached to another family.
 
 ## Market limitations and disclosures
 
