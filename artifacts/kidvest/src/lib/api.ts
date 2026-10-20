@@ -6,7 +6,7 @@ import { z } from "zod";
 import {
   RegisterParentBody, CreateKidBody, UpdateKidBody, CreateRequestBody,
   ReviewRequestBody, FundWalletBody, UpdateSettingsBody, CompleteLessonBody, CompleteChallengeBody,
-  GetStockChartQueryParams, GetStockQuoteQueryParams, SearchStocksQueryParams, ConfirmPaymentBody,
+  GetStockChartQueryParams, GetStockQuoteQueryParams, SearchStocksQueryParams, ConfirmPaymentBody, SandboxTradeInput,
 } from "@workspace/api-zod";
 import { authOptions, rateLimit } from "./auth";
 import { demoEnabled } from "./demo-mode";
@@ -22,6 +22,7 @@ import { familyRewards, kidRewards } from "./rewards";
 import { approveTrade } from "./trading";
 import { ownedPayment, startCheckout } from "./payments";
 import { ensureStripeReady, stripeConfigured } from "./stripe-setup";
+import { executeSandboxTrade, sandboxPortfolio } from "./sandbox";
 
 const quantitySchema = z.number().finite().positive().max(100000).refine(n => Math.abs(n * 1e6 - Math.round(n * 1e6)) < 0.00001, "Use at most 6 decimal places.");
 const usernameSchema = z.string().trim().toLowerCase().regex(/^[a-z0-9_-]{3,30}$/, "Usernames use 3–30 letters, numbers, hyphens or underscores.");
@@ -97,6 +98,21 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
         const data = GetStockChartQueryParams.parse(query);
         return json(await chart(data.symbol, data.range, user.isDemo));
       }
+    }
+    if (route === "kv/sandbox" && method === "GET") {
+      requireRole(user, "kid");
+      return json(sandboxPortfolio(user));
+    }
+    if (route === "kv/sandbox/trades" && method === "POST") {
+      requireRole(user, "kid");
+      rateLimit(`sandbox-trade:${user.id}`, 60, 60_000);
+      const data = SandboxTradeInput.parse(await body(req));
+      const q = await quote(data.symbol, user.isDemo);
+      ensureUsd(q.currency);
+      return json(await mutateState(pid, s => {
+        const kid = ownKid(s, user, user.id);
+        return executeSandboxTrade(kid, data, q);
+      }));
     }
     if (route === "kv/settings") {
       if (method === "GET") return json(publicUser(user));

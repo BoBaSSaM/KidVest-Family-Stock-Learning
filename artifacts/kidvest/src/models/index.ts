@@ -10,6 +10,9 @@ const userSchema = new Schema({
   parentId: { type: String, index: true }, age: Number, avatar: String,
   isDemo: Boolean, demoKey: { type: String, index: true }, notifications: Boolean,
   dailyLimit: Number, monthlyLimit: Number, completedLessons: [String], completedChallenges: [String],
+  sandboxBalance: Number,
+  sandboxHoldings: [{ _id: false, symbol: String, companyName: String, quantity: Number, avgBuyPrice: Number }],
+  sandboxTrades: [{ _id: false, id: String, symbol: String, companyName: String, side: { type: String, enum: ["buy", "sell"] }, quantity: Number, price: Number, total: Number, createdAt: String }],
   revision: { type: Number, default: 0 },
   authVersion: { type: Number, default: 0, min: 0 }, createdAt: String,
 }, { versionKey: false });

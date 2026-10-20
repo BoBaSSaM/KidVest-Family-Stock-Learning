@@ -145,6 +145,29 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Portfolio" }
+  /kv/sandbox:
+    get:
+      operationId: getSandbox
+      responses:
+        "200":
+          description: Child-only practice portfolio isolated from the family wallet and approval ledger
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SandboxPortfolio" }
+  /kv/sandbox/trades:
+    post:
+      operationId: placeSandboxTrade
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SandboxTradeInput" }
+      responses:
+        "200":
+          description: Updated practice portfolio after a simulated trade
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SandboxPortfolio" }
   /kv/activity:
     get:
       operationId: getActivity
@@ -485,6 +508,41 @@ components:
         gainLoss: { type: number }
         balance: { type: number }
         history: { type: array, items: { $ref: "#/components/schemas/Transaction" } }
+    SandboxHolding:
+      type: object
+      required: [symbol, companyName, quantity, avgBuyPrice]
+      properties:
+        symbol: { type: string }
+        companyName: { type: string }
+        quantity: { type: number }
+        avgBuyPrice: { type: number }
+    SandboxTrade:
+      type: object
+      required: [id, symbol, companyName, side, quantity, price, total, createdAt]
+      properties:
+        id: { type: string }
+        symbol: { type: string }
+        companyName: { type: string }
+        side: { type: string, enum: [buy, sell] }
+        quantity: { type: number }
+        price: { type: number }
+        total: { type: number }
+        createdAt: { type: string }
+    SandboxPortfolio:
+      type: object
+      required: [balance, holdings, trades, practiceOnly]
+      properties:
+        balance: { type: number }
+        holdings: { type: array, items: { $ref: "#/components/schemas/SandboxHolding" } }
+        trades: { type: array, items: { $ref: "#/components/schemas/SandboxTrade" } }
+        practiceOnly: { type: boolean, const: true }
+    SandboxTradeInput:
+      type: object
+      required: [symbol, side, quantity]
+      properties:
+        symbol: { type: string, minLength: 1, maxLength: 20 }
+        side: { type: string, enum: [buy, sell] }
+        quantity: { type: number, exclusiveMinimum: 0, maximum: 100000 }
     Activity:
       type: object
       required: [id, action, details, createdAt, actorName]
