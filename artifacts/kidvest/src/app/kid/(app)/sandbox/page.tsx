@@ -64,7 +64,7 @@ export default function KidSandboxPage() {
           <div>
             <p className="font-extrabold">{tr("Practice only — no real money or shares", "تدريب فقط — بلا أموال أو أسهم حقيقية")}</p>
             <p className="mt-1 text-sm font-semibold text-muted-foreground">
-              {tr("This practice balance is separate from your family wallet. Family portfolio requests still go to your parent for approval. Ghiras does not execute real trades.", "رصيد التدريب منفصل عن محفظة العائلة. تظل طلبات محفظة العائلة بحاجة إلى موافقة والديك. غراس لا ينفذ صفقات حقيقية.")}
+              {tr("This practice balance is separate from your family wallet. Family portfolio requests still go to your parent for approval. Sahim does not execute real trades.", "رصيد التدريب منفصل عن محفظة العائلة. تظل طلبات محفظة العائلة بحاجة إلى موافقة والديك. سهيم لا ينفذ صفقات حقيقية.")}
             </p>
           </div>
         </div>

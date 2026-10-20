@@ -1,4 +1,4 @@
-# غراس
+# سهيم
 
 A family stock-learning web application with separate parent and kid portals. All holdings and transactions are paper trading. No brokerage is connected.
 
@@ -42,7 +42,7 @@ The ZIP vendors generated client and validation packages, so no pnpm workspace i
 
 ## Run inside this workspace
 
-The managed Ghiras workflow serves the Next.js app. The shared Express scaffold is not used for Ghiras APIs; Next route handlers own `/api/*`.
+The managed Sahim workflow serves the Next.js app. The shared Express scaffold is not used for Sahim APIs; Next route handlers own `/api/*`.
 
 ```sh
 pnpm --filter @workspace/kidvest run typecheck

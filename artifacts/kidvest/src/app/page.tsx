@@ -54,8 +54,8 @@ export default function Landing() {
           </h1>
           <p className="mt-6 max-w-lg text-lg font-semibold text-muted-foreground">
             {tr(
-              "Ghiras lets children ages 7-12 discover real companies and ask to make virtual investments. Every single decision goes through a parent first.",
-              "«غراس» تتيح للأطفال من ٧ إلى ١٢ عامًا اكتشاف شركات حقيقية وطلب استثمارات افتراضية. وكل قرار يمرّ أولًا عبر أحد الوالدين.",
+              "Sahim lets children ages 7-12 discover real companies and ask to make virtual investments. Every single decision goes through a parent first.",
+              "«سهيم» تتيح للأطفال من ٧ إلى ١٢ عامًا اكتشاف شركات حقيقية وطلب استثمارات افتراضية. وكل قرار يمرّ أولًا عبر أحد الوالدين.",
             )}
           </p>
         </div>
@@ -147,7 +147,7 @@ export default function Landing() {
         </div>
         <div className="grid gap-4 md:col-span-2 sm:grid-cols-2">
           {[
-            [tr("Not a brokerage", "ليست شركة وساطة"), tr("Holdings are virtual and live inside Ghiras. Nobody buys a real share.", "الحيازات افتراضية داخل «غراس». لا يُشترى أي سهم حقيقي.")],
+            [tr("Not a brokerage", "ليست شركة وساطة"), tr("Holdings are virtual and live inside Sahim. Nobody buys a real share.", "الحيازات افتراضية داخل «سهيم». لا يُشترى أي سهم حقيقي.")],
             [tr("No guaranteed returns", "لا عوائد مضمونة"), tr("Prices go up and down. That is the lesson, not a bug.", "الأسعار ترتفع وتنخفض. هذا هو الدرس، وليس خطأ.")],
             [tr("Demo is clearly labeled", "العرض التجريبي موسوم بوضوح"), tr("Demo families use sample prices and virtual credits only.", "العائلات التجريبية تستخدم أسعارًا تجريبية ورصيدًا افتراضيًا فقط.")],
             [tr("Payments stay honest", "مدفوعات صادقة"), tr("Real wallet top-ups need a connected payment provider. We never fake a charge.", "شحن المحفظة الحقيقي يحتاج مزوّد دفع متصل. لا نزيّف أي عملية دفع.")],

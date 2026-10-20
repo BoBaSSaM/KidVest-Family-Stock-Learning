@@ -14,7 +14,7 @@ async function walletPrice(amountCents: number, stripe: Stripe) {
   if (prices.data[0]) return prices.data[0].id;
   const products = await stripe.products.search({ query: "active:'true' AND metadata['kidvest_kind']:'virtual_wallet_test'", limit: 1 });
   const product = products.data[0] || await stripe.products.create({
-    name: "KidVest virtual learning wallet — TEST",
+    name: "Sahim virtual learning wallet — TEST",
     description: "Test-mode funding of a virtual educational wallet. No real stock is purchased.",
     metadata: { kidvest_kind: "virtual_wallet_test" },
   }, { idempotencyKey: "kidvest-learning-wallet-product" });

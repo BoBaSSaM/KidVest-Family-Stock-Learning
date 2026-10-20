@@ -1,7 +1,7 @@
 export const lessonCatalog = [
   {
     id: "what-is-a-stock", title: "A tiny piece of something big", description: "Discover what owning a stock really means.",
-    content: "Imagine a company is a giant pizza. A share of stock is a tiny slice of ownership in that company. Companies sell shares to raise money for their business. When you own a share, you do not own the company's products — you own a small part of the business. Share prices can rise or fall as people change what they think the company is worth. In Ghiras, all shares are pretend, so you can practice safely.",
+    content: "Imagine a company is a giant pizza. A share of stock is a tiny slice of ownership in that company. Companies sell shares to raise money for their business. When you own a share, you do not own the company's products — you own a small part of the business. Share prices can rise or fall as people change what they think the company is worth. In Sahim, all shares are pretend, so you can practice safely.",
     duration: "3 min", category: "The basics", question: "When you buy a share of a company, what do you own?",
     options: ["A tiny part of the business", "One of its shops", "A promise of guaranteed profit", "All of its products"],
     answer: 0, xp: 50,

@@ -4,7 +4,7 @@ import type { ButtonHTMLAttributes, ComponentProps, ReactNode } from "react";
 import { useTheme } from "next-themes";
 import { useQueryClient, type QueryClient } from "@tanstack/react-query";
 import {
-  AlertTriangle, Flame, Fish, Grape, Languages, Moon, RotateCcw, Rocket, Sprout, Sun, SunMedium,
+  AlertTriangle, Flame, Fish, Grape, Languages, Moon, RotateCcw, Rocket, Sprout, Sun, SunMedium, TrendingUp,
 } from "lucide-react";
 import {
   getGetActivityQueryKey, getGetDashboardQueryKey, getGetKidsQueryKey, getGetPaymentsQueryKey,
@@ -180,11 +180,11 @@ export function Logo({ className }: { className?: string }) {
   return (
     <span className={cn("inline-flex items-center gap-2", className)}>
       <span className="relative grid h-10 w-10 rotate-[-8deg] place-items-center rounded-2xl bg-primary text-primary-foreground shadow-[0_4px_0_hsl(var(--primary-deep))]">
-        <Sprout className="h-6 w-6" aria-hidden />
+        <TrendingUp className="h-6 w-6" strokeWidth={2.8} aria-hidden />
         <span className="absolute -end-1 -top-1 h-3.5 w-3.5 rounded-full border-2 border-card bg-accent" />
       </span>
       <span dir="rtl" className="font-display whitespace-nowrap text-2xl font-extrabold">
-        <span className="text-primary">غراس</span>
+        <span className="text-primary">سهيم</span>
       </span>
     </span>
   );
@@ -229,8 +229,8 @@ export function Disclaimer({ className }: { className?: string }) {
   return (
     <p className={cn("text-xs font-bold text-muted-foreground", className)}>
       {tr(
-        "Educational use only. Not financial advice. Ghiras is not a brokerage; investments are virtual and returns are never guaranteed.",
-        "للاستخدام التعليمي فقط. ليست نصيحة مالية. «غراس» ليست شركة وساطة؛ الاستثمارات افتراضية والعوائد غير مضمونة أبدًا.",
+        "Educational use only. Not financial advice. Sahim is not a brokerage; investments are virtual and returns are never guaranteed.",
+        "للاستخدام التعليمي فقط. ليست نصيحة مالية. «سهيم» ليست شركة وساطة؛ الاستثمارات افتراضية والعوائد غير مضمونة أبدًا.",
       )}
     </p>
   );

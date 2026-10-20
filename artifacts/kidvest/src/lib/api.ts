@@ -82,7 +82,7 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
       await mutateState(id, s => {
         if (s.users.some(u => u.identifier === email)) throw new HttpError(409, "An account already uses this email.");
         s.users.push(user);
-        logActivity(s, user, "registration", "Created a KidVest family account.");
+        logActivity(s, user, "registration", "Created a Sahim family account.");
       });
       return json(publicUser(user), 201);
     }
