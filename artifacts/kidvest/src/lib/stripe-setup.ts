@@ -2,19 +2,27 @@ import { runMigrations } from "stripe-replit-sync";
 import { getStripeSync, getUncachableStripeClient } from "./stripe-client";
 const root = globalThis as typeof globalThis & { kidvestStripeReady?: Promise<void> };
 export const isVercelRuntime = () => process.env.VERCEL === "1" || !!process.env.VERCEL_URL;
-export const stripeConfigured = () => {
-  if (!process.env.MONGODB_URI) return false;
+export function stripeConfigurationIssues(): string[] {
+  const issues: string[] = [];
+  if (!process.env.MONGODB_URI) issues.push("MONGODB_URI");
   if (isVercelRuntime()) {
-    return !!process.env.STRIPE_SECRET_KEY
-      && !!process.env.STRIPE_WEBHOOK_SECRET
-      && !!process.env.NEXTAUTH_URL?.startsWith("https://");
+    if (!process.env.STRIPE_SECRET_KEY) issues.push("STRIPE_SECRET_KEY");
+    else if (!process.env.STRIPE_SECRET_KEY.startsWith("sk_test_")) issues.push("STRIPE_SECRET_KEY must be a test key (sk_test_...)");
+    if (!process.env.STRIPE_WEBHOOK_SECRET) issues.push("STRIPE_WEBHOOK_SECRET");
+    else if (!process.env.STRIPE_WEBHOOK_SECRET.startsWith("whsec_")) issues.push("STRIPE_WEBHOOK_SECRET must be a signing secret (whsec_...)");
+    if (!process.env.NEXTAUTH_URL?.startsWith("https://")) issues.push("NEXTAUTH_URL must be the deployed HTTPS origin");
+    return issues;
   }
-  return !!(process.env.STRIPE_SECRET_KEY || process.env.REPLIT_CONNECTORS_HOSTNAME)
-    && !!process.env.DATABASE_URL;
-};
+  if (!process.env.STRIPE_SECRET_KEY && !process.env.REPLIT_CONNECTORS_HOSTNAME) issues.push("STRIPE_SECRET_KEY or Replit Stripe connection");
+  if (!process.env.DATABASE_URL) issues.push("DATABASE_URL for Replit-managed Stripe sync");
+  return issues;
+}
+export const stripeConfigured = () => stripeConfigurationIssues().length === 0;
 export function ensureStripeReady() {
-  root.kidvestStripeReady ??= initializeStripe().catch(() => {
+  root.kidvestStripeReady ??= initializeStripe().catch((error) => {
     root.kidvestStripeReady = undefined;
+    const reason = error instanceof Error ? error.message : "Unknown setup error";
+    console.warn("[stripe] test payment setup failed:", reason);
     throw new Error("Stripe test payment setup is unavailable. No payment has been taken.");
   });
   return root.kidvestStripeReady;

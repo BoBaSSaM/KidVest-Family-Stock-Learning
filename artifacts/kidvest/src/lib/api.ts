@@ -8,7 +8,7 @@ import {
   ReviewRequestBody, FundWalletBody, UpdateSettingsBody, CompleteLessonBody, CompleteChallengeBody,
   GetStockChartQueryParams, GetStockQuoteQueryParams, SearchStocksQueryParams, ConfirmPaymentBody, PlaceSandboxTradeBody,
 } from "@workspace/api-zod";
-import { authOptions, rateLimit } from "./auth";
+import { getAuthOptions, rateLimit } from "./auth";
 import { demoEnabled } from "./demo-mode";
 import { authVersion, replacePassword, requireCurrentSession } from "./session-version";
 import { findUser, mutateState, readState, storageMode } from "./store";
@@ -21,7 +21,7 @@ import { challengeCatalog } from "./challenges";
 import { familyRewards, kidRewards } from "./rewards";
 import { approveTrade } from "./trading";
 import { ownedPayment, startCheckout } from "./payments";
-import { ensureStripeReady, stripeConfigured } from "./stripe-setup";
+import { ensureStripeReady, stripeConfigurationIssues, stripeConfigured } from "./stripe-setup";
 import { executeSandboxTrade, sandboxPortfolio } from "./sandbox";
 
 const quantitySchema = z.number().finite().positive().max(100000).refine(n => Math.abs(n * 1e6 - Math.round(n * 1e6)) < 0.00001, "Use at most 6 decimal places.");
@@ -31,7 +31,7 @@ function requireRole(u: StoredUser, role: "parent" | "kid") {
   if (u.role !== role) throw new HttpError(403, `This action is only available in the ${role} portal.`);
 }
 async function currentUser() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(getAuthOptions());
   if (!session?.user?.id) throw new HttpError(401, "Please sign in to continue.");
   const user = requireCurrentSession(session.user, await findUser(session.user.id));
   return { ...user, authVersion: authVersion(user) };
@@ -310,7 +310,11 @@ export async function handleApi(req: NextRequest, path: string[]): Promise<NextR
     if (route === "kv/payment-status" && method === "GET") {
       requireRole(user, "parent");
       try {
-        if (!stripeConfigured()) return json({ enabled: false, mode: "unavailable" });
+        const issues = stripeConfigurationIssues();
+        if (issues.length) {
+          console.warn("[stripe] test payments unavailable; check configuration:", issues.join(", "));
+          return json({ enabled: false, mode: "unavailable" });
+        }
         await ensureStripeReady();
         return json({ enabled: true, mode: "test" });
       } catch { return json({ enabled: false, mode: "unavailable" }); }

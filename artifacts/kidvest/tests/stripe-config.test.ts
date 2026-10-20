@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import Stripe from "stripe";
 import { verifyStripeWebhookPayload } from "../src/lib/payments";
-import { stripeConfigured } from "../src/lib/stripe-setup";
+import { stripeConfigurationIssues, stripeConfigured } from "../src/lib/stripe-setup";
 
 const keys = [
   "VERCEL",
@@ -54,6 +54,24 @@ test("Vercel checkout stays unavailable until the signed webhook and origin are 
   };
   withEnv({ ...base, STRIPE_WEBHOOK_SECRET: undefined }, () => assert.equal(stripeConfigured(), false));
   withEnv({ ...base, STRIPE_WEBHOOK_SECRET: "whsec_example", NEXTAUTH_URL: "http://localhost:3000" }, () => assert.equal(stripeConfigured(), false));
+});
+
+test("Stripe setup logs can identify missing Vercel variable names without exposing values", () => {
+  withEnv({
+    VERCEL: "1",
+    STRIPE_SECRET_KEY: undefined,
+    STRIPE_WEBHOOK_SECRET: undefined,
+    MONGODB_URI: undefined,
+    NEXTAUTH_URL: undefined,
+    DATABASE_URL: undefined,
+  }, () => {
+    assert.deepEqual(stripeConfigurationIssues(), [
+      "MONGODB_URI",
+      "STRIPE_SECRET_KEY",
+      "STRIPE_WEBHOOK_SECRET",
+      "NEXTAUTH_URL must be the deployed HTTPS origin",
+    ]);
+  });
 });
 
 test("Replit Stripe-managed sync still requires PostgreSQL and accepts the connected Stripe credential", () => {

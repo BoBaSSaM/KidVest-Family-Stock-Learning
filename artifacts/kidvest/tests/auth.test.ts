@@ -44,6 +44,30 @@ after(async () => {
   if (temp) await rm(temp, { recursive: true, force: true });
 });
 
+test("auth secret validation is deferred until runtime, not production build", () => {
+  const previous = {
+    NODE_ENV: process.env.NODE_ENV,
+    NEXT_PHASE: process.env.NEXT_PHASE,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    SESSION_SECRET: process.env.SESSION_SECRET,
+  };
+  try {
+    process.env.NODE_ENV = "production";
+    process.env.NEXT_PHASE = "phase-production-build";
+    delete process.env.NEXTAUTH_SECRET;
+    delete process.env.SESSION_SECRET;
+    assert.doesNotThrow(() => auth.getAuthOptions());
+
+    delete process.env.NEXT_PHASE;
+    assert.throws(() => auth.getAuthOptions(), /NEXTAUTH_SECRET is required/);
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});
+
 async function fixture() {
   cookies = {};
   fixtureNumber++;
@@ -62,13 +86,13 @@ async function fixture() {
 }
 
 async function login(user: StoredUser, suppliedPassword = password, role = user.role) {
-  const provider = auth.authOptions.providers[0] as unknown as { options: { authorize: (raw: unknown, req: unknown) => Promise<unknown> } };
+  const provider = auth.getAuthOptions().providers[0] as unknown as { options: { authorize: (raw: unknown, req: unknown) => Promise<unknown> } };
   return provider.options.authorize({ identifier: user.identifier, password: suppliedPassword, role }, { headers: { "x-forwarded-for": `test-${fixtureNumber}-${user.id}` } }) as Promise<(StoredUser & { authVersion: number }) | null>;
 }
 async function cookieFor(user: StoredUser, suppliedPassword = password) {
   const signedIn = await login(user, suppliedPassword);
   assert.ok(signedIn);
-  const jwt = auth.authOptions.callbacks!.jwt!;
+  const jwt = auth.getAuthOptions().callbacks!.jwt!;
   const token = await jwt({ token: {}, user: signedIn, account: null, trigger: "signIn" });
   return encode({ token, secret: auth.sessionSecret(), maxAge: 86400 });
 }
@@ -78,7 +102,7 @@ async function request(route: string, method = "GET", data?: unknown) {
   return api.handleApi(req, route.split("/"));
 }
 async function authRequest(action: string, method = "GET", data?: unknown) {
-  return NextAuth(auth.authOptions)(new NextRequest(`${origin}/api/auth/${action}`, { method, ...(data === undefined ? {} : { headers: { "content-type": "application/json" }, body: JSON.stringify(data) }) }), { params: Promise.resolve({ nextauth: [action] }) }) as Promise<Response>;
+  return NextAuth(auth.getAuthOptions())(new NextRequest(`${origin}/api/auth/${action}`, { method, ...(data === undefined ? {} : { headers: { "content-type": "application/json" }, body: JSON.stringify(data) }) }), { params: Promise.resolve({ nextauth: [action] }) }) as Promise<Response>;
 }
 
 test("parent password change rejects every old cookie, preserves other accounts, and requires the new password", async () => {
@@ -116,7 +140,7 @@ test("kid reset revokes only that child, including demo login credentials", asyn
   const saved = (await store.findUser(kid.id))!;
   assert.equal(saved.authVersion, 1);
   assert.equal(saved.demoKey, undefined);
-  const provider = auth.authOptions.providers[0] as any;
+  const provider = auth.getAuthOptions().providers[0] as any;
   assert.equal(await provider.options.authorize({ demoKey: "a".repeat(64), role: "kid" }, { headers: {} }), null);
   assert.equal((await request("kv/settings")).status, 200);
   for (const cookie of kidCookies) {
@@ -194,7 +218,7 @@ test("legacy JWTs cannot refresh or adopt a new version; public users hide inter
   assert.throws(() => requireCurrentSession({ id: parent.id, role: parent.role }, current), { status: 401 });
   assert.equal("authVersion" in publicUser(current), false);
   assert.equal("passwordHash" in publicUser(current), false);
-  const callback = auth.authOptions.callbacks!.jwt!;
+  const callback = auth.getAuthOptions().callbacks!.jwt!;
   await assert.rejects(() => callback({ token: { id: parent.id, role: parent.role }, trigger: "update", session: { authVersion: 0 } }), { status: 401 });
 });
 
